@@ -12,19 +12,23 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 final class Pulses_Page {
 
+    public static function init() {
+        add_action( 'admin_init', [ __CLASS__, 'handle_actions' ] );
+    }
+
 	public static function render_list() {
         if ( isset( $_GET['action'] ) && $_GET['action'] === 'edit' ) {
             self::render_edit();
             return;
         }
         
-		self::handle_actions();
+		// self::handle_actions();
 		$pulses = Pulses::all();
 		require PPLS_PATH . 'admin/views/pulses-list.php';
 	}
 
 	public static function render_edit() {
-		self::handle_actions();
+		// self::handle_actions();
 
 		$pulse_id = isset( $_GET['pulse'] ) ? sanitize_text_field( wp_unslash( $_GET['pulse'] ) ) : '';
 		$pulse    = $pulse_id ? Pulses::get( $pulse_id ) : null;
@@ -37,7 +41,7 @@ final class Pulses_Page {
 		echo '<p>' . esc_html__( 'Responses screen will be available in the next step.', 'plugiva-pulse' ) . '</p></div>';
 	}
 
-	private static function handle_actions() {
+	public static function handle_actions() {
 		if ( empty( $_POST['ppls_action'] ) ) {
 			return;
 		}

@@ -106,16 +106,31 @@ final class Pulses {
 		$allowed_types = [ 'emoji', 'yesno', 'text' ];
 		$clean         = [];
 
-		foreach ( array_slice( $questions, 0, 3 ) as $question ) {
-			if ( empty( $question['type'] ) || ! in_array( $question['type'], $allowed_types, true ) ) {
+		foreach ( $questions as $question ) {
+			if (
+				empty( $question['type'] ) ||
+				! in_array( $question['type'], $allowed_types, true )
+			) {
 				continue;
 			}
 
+			$label = isset( $question['label'] )
+				? sanitize_text_field( $question['label'] )
+				: '';
+
+			$id = isset( $question['id'] ) && $question['id'] !== ''
+				? sanitize_text_field( $question['id'] )
+				: uniqid( 'q_', false );
+
 			$clean[] = [
-				'id'    => sanitize_text_field( $question['id'] ?? uniqid( 'q_', false ) ),
+				'id'    => $id,
 				'type'  => $question['type'],
-				'label' => sanitize_text_field( $question['label'] ?? '' ),
+				'label' => $label,
 			];
+
+			if ( count( $clean ) === 3 ) {
+				break;
+			}
 		}
 
 		return $clean;

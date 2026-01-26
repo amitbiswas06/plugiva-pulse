@@ -14,6 +14,12 @@ if ( isset( $_GET['updated'] ) ) :
 
 	<form method="post">
 		<?php wp_nonce_field( 'ppls_pulse_action' ); ?>
+        <?php if ( ! empty( $pulse['id'] ) ) : ?>
+            <input type="hidden"
+                name="pulse[id]"
+                value="<?php echo esc_attr( $pulse['id'] ); ?>">
+        <?php endif; ?>
+
 		<input type="hidden" name="ppls_action" value="save">
 
 		<table class="form-table">
@@ -55,22 +61,24 @@ if ( isset( $_GET['updated'] ) ) :
                 ?>
                     <tr>
                         <td>
+                            <input type="hidden"
+                                name="pulse[questions][<?php echo esc_attr( (int) $i ); ?>][id]"
+                                value="<?php echo esc_attr( $q['id'] ?? '' ); ?>">
+
                             <input type="text"
-                                name="pulse[questions][<?php esc_attr( (int) $i ); ?>][label]"
+                                name="pulse[questions][<?php echo esc_attr( (int) $i ); ?>][label]"
                                 value="<?php echo esc_attr( $q['label'] ?? '' ); ?>"
                                 class="regular-text">
                         </td>
                         <td>
-                            <select name="pulse[questions][<?php esc_attr( (int) $i ); ?>][type]">
+                            <select name="pulse[questions][<?php echo esc_attr( (int) $i ); ?>][type]">
                                 <option value=""><?php esc_html_e( '— Select —', 'plugiva-pulse' ); ?></option>
                                 <option value="emoji" <?php selected( $q['type'] ?? '', 'emoji' ); ?>>
                                     <?php esc_html_e( 'Emoji', 'plugiva-pulse' ); ?>
                                 </option>
-
                                 <option value="yesno" <?php selected( $q['type'] ?? '', 'yesno' ); ?>>
                                     <?php esc_html_e( 'Yes / No', 'plugiva-pulse' ); ?>
                                 </option>
-
                                 <option value="text" <?php selected( $q['type'] ?? '', 'text' ); ?>>
                                     <?php esc_html_e( 'Short text', 'plugiva-pulse' ); ?>
                                 </option>
