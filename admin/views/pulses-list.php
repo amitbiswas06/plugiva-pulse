@@ -5,9 +5,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( isset( $_GET['updated'] ) ) : 
 ?>
-	<div class="notice notice-success is-dismissible">
-		<p><?php esc_html_e( 'Pulse updated.', 'plugiva-pulse' ); ?></p>
-	</div>
+<div class="notice notice-success is-dismissible">
+    <p><?php esc_html_e( 'Pulse updated.', 'plugiva-pulse' ); ?></p>
+</div>
 <?php endif; ?>
 <div class="wrap">
 	<h1>
@@ -37,7 +37,11 @@ if ( isset( $_GET['updated'] ) ) :
                     <td><?php echo esc_html( $pulse['title'] ); ?></td>
                     <td><?php echo esc_html( ucfirst( $pulse['visibility'] ) ); ?></td>
                     <td><?php echo $pulse['enabled'] ? esc_html__( 'Enabled', 'plugiva-pulse' ) : esc_html__( 'Disabled', 'plugiva-pulse' ); ?></td>
-                    <td><?php echo count( $pulse['questions'] ); ?></td>
+                    <td><?php
+                    echo isset( $pulse['questions'] ) && is_array( $pulse['questions'] )
+                        ? count( $pulse['questions'] )
+                        : 0;
+                    ?></td>
 
                     <td>
                         <ul class="row-actions">

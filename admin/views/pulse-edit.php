@@ -5,10 +5,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( isset( $_GET['updated'] ) ) : 
 ?>
-	<div class="notice notice-success is-dismissible">
-		<p><?php esc_html_e( 'Pulse updated.', 'plugiva-pulse' ); ?></p>
-	</div>
+<div class="notice notice-success is-dismissible">
+    <p><?php esc_html_e( 'Pulse updated.', 'plugiva-pulse' ); ?></p>
+</div>
 <?php endif; ?>
+
+<?php if ( isset( $_GET['ppls_error'] ) ) : ?>
+<div class="notice notice-error">
+    <p>
+        <?php
+        if ( $_GET['ppls_error'] === 'ppls_missing_title' ) {
+            esc_html_e( 'Pulse title is required.', 'plugiva-pulse' );
+        } elseif ( $_GET['ppls_error'] === 'ppls_invalid_question' ) {
+            esc_html_e( 'Each question must have both a label and a type.', 'plugiva-pulse' );
+        }
+        ?>
+    </p>
+</div>
+<?php endif; ?>
+
 <div class="wrap">
 	<h1><?php echo $pulse ? esc_html__( 'Edit Pulse', 'plugiva-pulse' ) : esc_html__( 'Add Pulse', 'plugiva-pulse' ); ?></h1>
 

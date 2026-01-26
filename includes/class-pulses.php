@@ -22,7 +22,18 @@ final class Pulses {
 	 */
 	public static function all() {
 		$pulses = get_option( self::OPTION_KEY, [] );
-		return is_array( $pulses ) ? $pulses : [];
+
+		if ( ! is_array( $pulses ) ) {
+			return [];
+		}
+
+		// Filter out any invalid entries (e.g. WP_Error)
+		return array_filter(
+			$pulses,
+			static function ( $pulse ) {
+				return is_array( $pulse );
+			}
+		);
 	}
 
 	/**
@@ -49,6 +60,10 @@ final class Pulses {
 		$validated = self::validate( array_merge( $data, [
 			'id' => $pulse_id,
 		] ) );
+
+		if ( is_wp_error( $validated ) ) {
+			return $validated;
+		}
 
 		$pulses[ $pulse_id ] = $validated;
 
@@ -79,21 +94,59 @@ final class Pulses {
 	 * @return array
 	 */
 	private static function validate( array $data ) {
-		$now = current_time( 'mysql' );
 
-		$pulse = [
-			'id'         => sanitize_text_field( $data['id'] ),
-			'title'      => sanitize_text_field( $data['title'] ?? '' ),
-			'visibility' => in_array( $data['visibility'] ?? 'public', [ 'public', 'admin' ], true )
-				? $data['visibility']
-				: 'public',
-			'enabled'    => ! empty( $data['enabled'] ),
-			'questions'  => self::validate_questions( $data['questions'] ?? [] ),
-			'created_at' => $data['created_at'] ?? $now,
-			'updated_at' => $now,
+		// --- ID (create vs edit) ---
+		$id = isset( $data['id'] ) && $data['id'] !== ''
+			? sanitize_text_field( $data['id'] )
+			: self::generate_id();
+
+		// --- Title (REQUIRED) ---
+		$title = sanitize_text_field( $data['title'] ?? '' );
+
+		if ( $title === '' ) {
+			return new \WP_Error(
+				'ppls_missing_title',
+				__( 'Pulse title is required.', 'plugiva-pulse' )
+			);
+		}
+
+		// --- Visibility ---
+		$visibility = in_array(
+			$data['visibility'] ?? 'public',
+			[ 'public', 'admin' ],
+			true
+		)
+			? $data['visibility']
+			: 'public';
+
+		// --- Enabled flag ---
+		$enabled = ! empty( $data['enabled'] );
+
+		// --- Questions (CRITICAL PART) ---
+		$questions = self::validate_questions( $data['questions'] ?? [] );
+
+		// HARD STOP: never embed WP_Error into pulse data
+		if ( is_wp_error( $questions ) ) {
+			return $questions;
+		}
+
+		// --- Timestamps ---
+		$created_at = isset( $data['created_at'] ) && $data['created_at'] !== ''
+			? sanitize_text_field( $data['created_at'] )
+			: current_time( 'mysql' );
+
+		$updated_at = current_time( 'mysql' );
+
+		// --- Final validated pulse ---
+		return [
+			'id'         => $id,
+			'title'      => $title,
+			'visibility' => $visibility,
+			'enabled'    => $enabled,
+			'questions'  => $questions, // ALWAYS array now
+			'created_at' => $created_at,
+			'updated_at' => $updated_at,
 		];
-
-		return $pulse;
 	}
 
 	/**
@@ -107,16 +160,25 @@ final class Pulses {
 		$clean         = [];
 
 		foreach ( $questions as $question ) {
-			if (
-				empty( $question['type'] ) ||
-				! in_array( $question['type'], $allowed_types, true )
-			) {
-				continue;
-			}
 
 			$label = isset( $question['label'] )
 				? sanitize_text_field( $question['label'] )
 				: '';
+
+			$type = $question['type'] ?? '';
+
+			// Completely empty row → ignore
+			if ( $label === '' && $type === '' ) {
+				continue;
+			}
+
+			// Partial row → error
+			if ( $label === '' || ! in_array( $type, $allowed_types, true ) ) {
+				return new \WP_Error(
+					'ppls_invalid_question',
+					__( 'Each question must have both a label and a valid type.', 'plugiva-pulse' )
+				);
+			}
 
 			$id = isset( $question['id'] ) && $question['id'] !== ''
 				? sanitize_text_field( $question['id'] )
@@ -124,7 +186,7 @@ final class Pulses {
 
 			$clean[] = [
 				'id'    => $id,
-				'type'  => $question['type'],
+				'type'  => $type,
 				'label' => $label,
 			];
 
