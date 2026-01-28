@@ -19,6 +19,10 @@ final class Plugin {
 	}
 
 	private function __construct() {
+
+		// Register shortcodes at the right time
+		add_action( 'init', [ $this, 'register_shortcodes' ] );
+
 		if ( is_admin() ) {
 			require_once PPLS_PATH . 'admin/class-admin.php';
 			require_once PPLS_PATH . 'admin/class-menu.php';
@@ -26,5 +30,9 @@ final class Plugin {
 
 			Admin::init();
 		}
+	}
+
+	public function register_shortcodes(): void {
+		Shortcodes::register();
 	}
 }
