@@ -1,0 +1,18 @@
+{
+	"apiVersion": 2,
+	"name": "plugiva/pulse",
+	"title": "Pulse",
+	"description": "Display a Plugiva Pulse.",
+	"category": "widgets",
+	"icon": "megaphone",
+	"textdomain": "plugiva-pulse",
+	"attributes": {
+		"pulseId": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"html": false
+	}
+}

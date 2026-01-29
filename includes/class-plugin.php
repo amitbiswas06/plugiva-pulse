@@ -20,6 +20,9 @@ final class Plugin {
 
 	private function __construct() {
 
+		Rest::register();
+		Blocks::register();
+
 		// Register shortcodes at the right time
 		add_action( 'init', [ $this, 'register_shortcodes' ] );
 
