@@ -36,13 +36,53 @@ final class Pulse_Renderer {
 		?>
 		<div class="ppls-pulse" data-pulse-id="<?php echo esc_attr( $pulse['id'] ); ?>">
 
-			<?php if ( ! empty( $pulse['title'] ) ) : ?>
-				<h3 class="ppls-pulse-title">
-					<?php echo esc_html( $pulse['title'] ); ?>
-				</h3>
-			<?php endif; ?>
+			<form
+				class="ppls-pulse-form"
+				method="post"
+				action="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
+				data-pulse="<?php echo esc_attr( $pulse['id'] ); ?>"
+			><?php
+				// Security nonce.
+				wp_nonce_field( 'ppls_submit', 'nonce' );
+			?>
 
-			<?php self::render_questions( $pulse['questions'] ?? [] ); ?>
+				<input type="hidden" name="action" value="ppls_submit_pulse">
+				<input type="hidden" name="pulse_id" value="<?php echo esc_attr( $pulse['id'] ); ?>">
+
+				<?php
+				$started_at = time();
+
+				$session_hash = hash_hmac(
+					'sha256',
+					$pulse['id'] . '|' . ( $_SERVER['HTTP_USER_AGENT'] ?? '' ) . '|' . gmdate( 'Y-m-d-H' ),
+					wp_salt()
+				);
+				?>
+
+				<input type="hidden" name="meta[started_at]" value="<?php echo esc_attr( $started_at ); ?>">
+				<input type="hidden" name="meta[hash]" value="<?php echo esc_attr( $session_hash ); ?>">
+
+				<!-- Honeypot field (bots only) -->
+				<input
+					type="text"
+					name="meta[ppls_hp]"
+					value=""
+					tabindex="-1"
+					autocomplete="off"
+					style="position:absolute;left:-9999px;height:0;width:0;opacity:0;"
+				>
+
+				<?php if ( ! empty( $pulse['title'] ) ) : ?>
+					<h3 class="ppls-pulse-title">
+						<?php echo esc_html( $pulse['title'] ); ?>
+					</h3>
+				<?php endif; ?>
+
+				<?php self::render_questions( $pulse['questions'] ?? [] ); ?>
+
+				<button type="submit" class="ppls-submit"><?php esc_html_e( 'Submit', 'plugiva-pulse' ); ?></button>
+
+			</form>
 
 		</div>
 		<?php
@@ -80,67 +120,90 @@ final class Pulse_Renderer {
 	 */
 	private static function render_questions( array $questions ): void {
 
-		if ( empty( $questions ) ) {
-			return;
+		foreach ( $questions as $index => $question ) {
+
+			if ( empty( $question['label'] ) || empty( $question['type'] ) ) {
+				continue;
+			}
+
+			echo '<div class="ppls-question">';
+
+			echo '<label class="ppls-question-label">';
+			echo esc_html( $question['label'] );
+			echo '</label>';
+
+			self::render_question_input( $question, $index );
+
+			echo '</div>';
 		}
-
-		?>
-		<ul class="ppls-questions">
-			<?php foreach ( $questions as $question ) : ?>
-				<li class="ppls-question" data-qid="<?php echo esc_attr( $question['id'] ); ?>">
-
-					<span class="ppls-question-label">
-						<?php echo esc_html( $question['label'] ); ?>
-					</span>
-
-					<div class="ppls-question-input">
-						<?php self::render_question_input( $question ); ?>
-					</div>
-
-				</li>
-			<?php endforeach; ?>
-		</ul>
-		<?php
 	}
 
 	/**
-	 * Render question input (display only).
+	 * Render the input field for a single question.
 	 *
-	 * @param array $question Question data.
+	 * @param array $question Question configuration.
+	 * @param int   $index    Question index.
 	 * @return void
 	 */
-	private static function render_question_input( array $question ): void {
+	private static function render_question_input( array $question, int $index ): void {
+
+		$name = 'answers[q' . $index . ']';
 
 		switch ( $question['type'] ) {
 
 			case 'emoji':
-                ?>
-                <ul class="ppls-emoji-scale" aria-hidden="true">
-                    <li class="ppls-emoji-option ppls-emoji-positive">smile1</li>
-                    <li class="ppls-emoji-option ppls-emoji-neutral">smile2</li>
-                    <li class="ppls-emoji-option ppls-emoji-negative">smile3</li>
-                </ul>
-                <?php
-                break;
+				?>
+				<div class="ppls-input ppls-input-emoji">
+					<label>
+						<input type="radio" name="<?php echo esc_attr( $name ); ?>" value="happy">
+						<span aria-hidden="true">🙂</span>
+						<span class="screen-reader-text"><?php esc_html_e( 'Happy', 'plugiva-pulse' ); ?></span>
+					</label>
+
+					<label>
+						<input type="radio" name="<?php echo esc_attr( $name ); ?>" value="neutral">
+						<span aria-hidden="true">😐</span>
+						<span class="screen-reader-text"><?php esc_html_e( 'Neutral', 'plugiva-pulse' ); ?></span>
+					</label>
+
+					<label>
+						<input type="radio" name="<?php echo esc_attr( $name ); ?>" value="sad">
+						<span aria-hidden="true">🙁</span>
+						<span class="screen-reader-text"><?php esc_html_e( 'Sad', 'plugiva-pulse' ); ?></span>
+					</label>
+				</div>
+				<?php
+				break;
 
 			case 'yesno':
 				?>
-				<label>
-					<input type="radio" disabled>
-					<?php esc_html_e( 'Yes', 'plugiva-pulse' ); ?>
-				</label>
-				<label>
-					<input type="radio" disabled>
-					<?php esc_html_e( 'No', 'plugiva-pulse' ); ?>
-				</label>
+				<div class="ppls-input ppls-input-yes-no">
+					<label>
+						<input type="radio" name="<?php echo esc_attr( $name ); ?>" value="yes">
+						<?php esc_html_e( 'Yes', 'plugiva-pulse' ); ?>
+					</label>
+
+					<label>
+						<input type="radio" name="<?php echo esc_attr( $name ); ?>" value="no">
+						<?php esc_html_e( 'No', 'plugiva-pulse' ); ?>
+					</label>
+				</div>
 				<?php
 				break;
 
 			case 'text':
 				?>
-				<textarea disabled rows="2"></textarea>
+				<div class="ppls-input ppls-input-text">
+					<input
+						type="text"
+						name="<?php echo esc_attr( $name ); ?>"
+						class="ppls-text-input"
+						autocomplete="off"
+					>
+				</div>
 				<?php
 				break;
 		}
 	}
+
 }
