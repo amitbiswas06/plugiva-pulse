@@ -32,14 +32,16 @@ final class Schema {
 			CREATE TABLE {$table_name} (
 				id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 				pulse_id VARCHAR(64) NOT NULL,
-				question_id VARCHAR(64) NOT NULL,
+				question_index TINYINT UNSIGNED NOT NULL,
+				question_label VARCHAR(255) NOT NULL,
 				question_type VARCHAR(20) NOT NULL,
 				answer LONGTEXT NOT NULL,
 				session_hash CHAR(64) NOT NULL,
-				submitted_at DATETIME NOT NULL,
-				PRIMARY KEY  (id),
+				created_at DATETIME NOT NULL,
+				PRIMARY KEY (id),
 				KEY pulse_id (pulse_id),
-				KEY submitted_at (submitted_at)
+				KEY session_hash (session_hash),
+				KEY created_at (created_at)
 			) {$charset};
 		";
 

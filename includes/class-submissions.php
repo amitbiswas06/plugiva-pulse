@@ -22,7 +22,7 @@ final class Submissions {
 
 	/**
 	 * Main AJAX handler.
-     * assert → nonce → payload → spam → pulse → answers → success
+     * assert → nonce → payload → spam → pulse → answers → store → success
 	 *
 	 * @return void
 	 */
@@ -35,9 +35,16 @@ final class Submissions {
 
 		self::validate_spam( $payload );
 		$pulse = self::validate_pulse( $payload['pulse_id'] );
-		self::validate_answers( $pulse, $payload['answers'] );
+		self::validate_answers( 
+            $pulse, 
+            $payload['answers'] 
+        );
 
-		// Step 6.4 will store data here.
+        self::store_responses( 
+            $pulse, 
+            $payload['answers'], 
+            $payload['meta']['hash'] 
+        );
 
 		wp_send_json_success( [ 'received' => true ] );
 	}
@@ -191,4 +198,58 @@ final class Submissions {
 			}
 		}
 	}
+
+    /**
+     * Store validated responses into the database.
+     *
+     * @param array $pulse   Pulse configuration.
+     * @param array $answers Submitted answers.
+     * @return void
+     */
+    private static function store_responses( array $pulse, array $answers, string $session_hash ): void {
+
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'ppls_responses';
+
+        $questions = isset( $pulse['questions'] ) && is_array( $pulse['questions'] )
+            ? array_values( $pulse['questions'] )
+            : [];
+
+        $now = current_time( 'mysql' );
+
+        foreach ( $questions as $index => $question ) {
+
+            $key = 'q' . $index;
+
+            if ( ! array_key_exists( $key, $answers ) ) {
+                continue; // Question not answered (allowed in MVP).
+            }
+
+            $value = trim( (string) $answers[ $key ] );
+
+            $wpdb->insert(
+                $table,
+                [
+                    'pulse_id'       => $pulse['id'],
+                    'question_index' => $index,
+                    'question_label' => $question['label'],
+                    'question_type'  => $question['type'],
+                    'answer'         => $value,
+                    'session_hash'   => $session_hash,
+                    'created_at'     => $now,
+                ],
+                [
+                    '%s', // pulse_id
+                    '%d', // question_index
+                    '%s', // question_label
+                    '%s', // question_type
+                    '%s', // answer
+                    '%s', // session_hash
+                    '%s', // created_at
+                ]
+            );
+        }
+    }
+
 }
