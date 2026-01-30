@@ -22,6 +22,7 @@ final class Plugin {
 
 		Rest::register();
 		Blocks::register();
+		Submissions::register();
 
 		// Register shortcodes at the right time
 		add_action( 'init', [ $this, 'register_shortcodes' ] );
