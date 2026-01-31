@@ -149,7 +149,7 @@ final class Submissions {
 			? array_values( $pulse['questions'] )
 			: [];
 
-		if ( empty( $answers ) || ! is_array( $answers ) ) {
+		if ( ! is_array( $answers ) ) {
 			wp_send_json_error( [ 'message' => 'Invalid answers.' ], 400 );
 		}
 
@@ -227,6 +227,10 @@ final class Submissions {
             }
 
             $value = trim( (string) $answers[ $key ] );
+
+			if ( $value === '' ) {
+				continue;
+			}
 
             $wpdb->insert(
                 $table,
