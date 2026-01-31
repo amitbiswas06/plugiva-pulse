@@ -15,6 +15,11 @@ final class Responses_Page {
 	 * @return void
 	 */
 	public static function render_responses(): void {
-		require PPLS_PATH . 'admin/views/responses-page.php';
-	}
+
+        $table = new Responses_Table();
+        $table->prepare_items();
+
+        require PPLS_PATH . 'admin/views/responses-page.php';
+    }
+
 }
