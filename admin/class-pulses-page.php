@@ -45,11 +45,6 @@ final class Pulses_Page {
 		require PPLS_PATH . 'admin/views/pulse-edit.php';
 	}
 
-	public static function render_responses_stub() {
-		echo '<div class="wrap"><h1>' . esc_html__( 'Responses', 'plugiva-pulse' ) . '</h1>';
-		echo '<p>' . esc_html__( 'Responses screen will be available in the next step.', 'plugiva-pulse' ) . '</p></div>';
-	}
-
 	public static function handle_actions() {
 
         if ( empty( $_POST['ppls_action'] ) ) {

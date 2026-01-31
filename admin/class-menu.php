@@ -39,7 +39,7 @@ final class Menu {
 			__( 'Responses', 'plugiva-pulse' ),
 			'manage_options',
 			'ppls-responses',
-			[ Pulses_Page::class, 'render_responses_stub' ]
+			[ Responses_Page::class, 'render_responses' ]
 		);
 	}
 }
