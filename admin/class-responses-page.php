@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Responses_Page {
 
 	public static function init(): void {
+		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_assets' ] );
 		add_action( 'admin_init', [ __CLASS__, 'maybe_export_csv' ] );
 	}
 
@@ -87,5 +88,29 @@ final class Responses_Page {
 		self::export_csv();
 		exit;
 	}
+
+	public static function enqueue_assets(): void {
+
+		if ( ! isset( $_GET['page'] ) || $_GET['page'] !== 'ppls-responses' ) {
+			return;
+		}
+
+		wp_enqueue_script(
+			'ppls-admin-responses',
+			PPLS_URL . 'assets/js/ppls-admin-responses.js',
+			[],
+			microtime(),
+			true
+		);
+
+		wp_add_inline_script(
+			'ppls-admin-responses',
+			'window.pplsResponses = ' . wp_json_encode( [
+				'confirmDelete' => __( 'Are you sure you want to delete selected responses?', 'plugiva-pulse' ),
+			] ),
+			'before'
+		);
+	}
+
 
 }
