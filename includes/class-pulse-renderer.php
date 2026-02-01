@@ -72,7 +72,15 @@ final class Pulse_Renderer {
 					style="position:absolute;left:-9999px;height:0;width:0;opacity:0;"
 				>
 
-				<?php if ( ! empty( $pulse['title'] ) ) : ?>
+				<?php 
+				// Allow disabling the title via filter.
+				$show_title = apply_filters(
+					'ppls_show_pulse_title',
+					true,
+					$pulse
+				);
+
+				if ( $show_title ) : ?>
 					<h3 class="ppls-pulse-title">
 						<?php echo esc_html( $pulse['title'] ); ?>
 					</h3>
@@ -103,9 +111,7 @@ final class Pulse_Renderer {
 			return false;
 		}
 
-		$is_admin = ! empty( $context['admin'] );
-
-		if ( $pulse['visibility'] === 'admin' && ! $is_admin ) {
+		if ( $pulse['visibility'] === 'admin' && ! current_user_can( 'manage_options' ) ) {
 			return false;
 		}
 
@@ -128,9 +134,9 @@ final class Pulse_Renderer {
 
 			echo '<div class="ppls-question">';
 
-			echo '<label class="ppls-question-label">';
+			echo '<p class="ppls-question-text">';
 			echo esc_html( $question['label'] );
-			echo '</label>';
+			echo '</p>';
 
 			self::render_question_input( $question, $index );
 
@@ -156,19 +162,19 @@ final class Pulse_Renderer {
 				<div class="ppls-input ppls-input-emoji">
 					<label>
 						<input type="radio" name="<?php echo esc_attr( $name ); ?>" value="happy">
-						<span aria-hidden="true">🙂</span>
+						<span class="ppls-emoji" data-emoji="happy" aria-hidden="true"></span>
 						<span class="screen-reader-text"><?php esc_html_e( 'Happy', 'plugiva-pulse' ); ?></span>
 					</label>
 
 					<label>
 						<input type="radio" name="<?php echo esc_attr( $name ); ?>" value="neutral">
-						<span aria-hidden="true">😐</span>
+						<span class="ppls-emoji" data-emoji="neutral" aria-hidden="true"></span>
 						<span class="screen-reader-text"><?php esc_html_e( 'Neutral', 'plugiva-pulse' ); ?></span>
 					</label>
 
 					<label>
 						<input type="radio" name="<?php echo esc_attr( $name ); ?>" value="sad">
-						<span aria-hidden="true">🙁</span>
+						<span class="ppls-emoji" data-emoji="sad" aria-hidden="true"></span>
 						<span class="screen-reader-text"><?php esc_html_e( 'Sad', 'plugiva-pulse' ); ?></span>
 					</label>
 				</div>

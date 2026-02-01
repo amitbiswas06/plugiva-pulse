@@ -13,6 +13,8 @@ final class Responses_Page {
 	public static function init(): void {
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_assets' ] );
 		add_action( 'admin_init', [ __CLASS__, 'maybe_export_csv' ] );
+		add_action( 'admin_init', [ __CLASS__, 'handle_bulk_delete' ] );
+		add_action( 'admin_notices', [ __CLASS__, 'maybe_show_notice' ] );
 	}
 
     /**
@@ -87,6 +89,63 @@ final class Responses_Page {
 
 		self::export_csv();
 		exit;
+	}
+
+	public static function handle_bulk_delete(): void {
+
+		if (
+			! is_admin() ||
+			empty( $_POST['action'] ) ||
+			$_POST['action'] !== 'delete' ||
+			empty( $_GET['page'] ) ||
+			$_GET['page'] !== 'ppls-responses'
+		) {
+			return;
+		}
+
+		check_admin_referer( 'bulk-responses' );
+
+		$ids = array_map( 'absint', $_POST['response_ids'] ?? [] );
+		if ( empty( $ids ) ) {
+			return;
+		}
+
+		global $wpdb;
+
+		$table = $wpdb->prefix . 'ppls_responses';
+		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$table} WHERE id IN ({$placeholders})",
+				$ids
+			)
+		);
+
+		wp_safe_redirect(
+			add_query_arg(
+				'ppls_deleted',
+				'1',
+				admin_url( 'admin.php?page=ppls-responses' )
+			)
+		);
+		exit;
+	}
+
+	public static function maybe_show_notice(): void {
+
+		if (
+			empty( $_GET['page'] ) ||
+			$_GET['page'] !== 'ppls-responses' ||
+			empty( $_GET['ppls_deleted'] )
+		) {
+			return;
+		}
+		?>
+		<div class="notice notice-success is-dismissible">
+			<p><?php esc_html_e( 'Selected responses deleted.', 'plugiva-pulse' ); ?></p>
+		</div>
+		<?php
 	}
 
 	public static function enqueue_assets(): void {

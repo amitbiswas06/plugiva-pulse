@@ -8,11 +8,16 @@ document.addEventListener('DOMContentLoaded', () => {
 	form.addEventListener('submit', (event) => {
 
 		const actionSelect = form.querySelector('select[name="action"]');
-		if (!actionSelect) {
+		if (!actionSelect || actionSelect.value !== 'delete') {
 			return;
 		}
 
-		if (actionSelect.value !== 'delete') {
+		const checkedItems = form.querySelectorAll(
+			'input[name="response_ids[]"]:checked'
+		);
+
+		// No items selected → do nothing
+		if (checkedItems.length === 0) {
 			return;
 		}
 

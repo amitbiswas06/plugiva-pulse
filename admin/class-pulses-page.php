@@ -14,6 +14,7 @@ final class Pulses_Page {
 
     public static function init() {
         add_action( 'admin_init', [ __CLASS__, 'handle_actions' ] );
+        add_action( 'admin_notices', [ __CLASS__, 'maybe_show_notice' ] );
     }
 
 	public static function render_list() {
@@ -82,7 +83,7 @@ final class Pulses_Page {
                     }
                 }
 
-                wp_safe_redirect( admin_url( 'admin.php?page=ppls-pulses&updated=1' ) );
+                wp_safe_redirect( admin_url( 'admin.php?page=ppls-pulses&ppls_updated=1' ) );
                 exit;
 
             case 'delete':
@@ -93,7 +94,7 @@ final class Pulses_Page {
                     );
                 }
 
-                wp_safe_redirect( admin_url( 'admin.php?page=ppls-pulses&updated=1' ) );
+                wp_safe_redirect( admin_url( 'admin.php?page=ppls-pulses&ppls_deleted=1' ) );
                 exit;
 
             case 'toggle':
@@ -108,8 +109,33 @@ final class Pulses_Page {
                     }
                 }
 
-                wp_safe_redirect( admin_url( 'admin.php?page=ppls-pulses&updated=1' ) );
+                wp_safe_redirect( admin_url( 'admin.php?page=ppls-pulses&ppls_updated=1' ) );
                 exit;
+        }
+    }
+
+    public static function maybe_show_notice(): void {
+        if (
+            empty( $_GET['page'] ) ||
+            $_GET['page'] !== 'ppls-pulses'
+        ) {
+            return;
+        }
+
+        if ( ! empty( $_GET['ppls_updated'] ) ) {
+            ?>
+            <div class="notice notice-success is-dismissible">
+                <p><?php esc_html_e( 'Pulse updated.', 'plugiva-pulse' ); ?></p>
+            </div>
+            <?php
+        }
+
+        if ( ! empty( $_GET['ppls_deleted'] ) ) {
+            ?>
+            <div class="notice notice-success is-dismissible">
+                <p><?php esc_html_e( 'Pulse deleted.', 'plugiva-pulse' ); ?></p>
+            </div>
+            <?php
         }
     }
 

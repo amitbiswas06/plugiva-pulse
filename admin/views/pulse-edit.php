@@ -3,14 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( isset( $_GET['updated'] ) ) : 
-?>
-<div class="notice notice-success is-dismissible">
-    <p><?php esc_html_e( 'Pulse updated.', 'plugiva-pulse' ); ?></p>
-</div>
-<?php endif; ?>
-
-<?php if ( isset( $_GET['ppls_error'] ) ) : ?>
+if ( isset( $_GET['ppls_error'] ) ) : ?>
 <div class="notice notice-error">
     <p>
         <?php

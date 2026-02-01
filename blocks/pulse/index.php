@@ -58,8 +58,8 @@ function render_pulse_block( array $attributes ): string {
 	return Pulse_Renderer::render(
 		$pulse_id,
 		[
-			'admin' => is_admin(),
-			'source' => 'block',
+			'admin'		=> is_admin(),
+			'source'	=> 'block',
 		]
 	);
 }

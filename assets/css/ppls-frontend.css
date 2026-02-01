@@ -1,14 +1,97 @@
-.ppls-success {
-	padding: 1em;
-	border: 1px solid #d1e7dd;
-	background: #d1e7dd;
-	color: #0f5132;
+/* Pulse wrapper */
+.ppls-pulse {
+	max-width: 640px;
+	margin: 1.5em 0;
+	padding: 1.25em;
+	border: 1px solid #e5e5e5;
+	border-radius: 6px;
+	background: #fff;
 }
 
+/* Pulse title */
+.ppls-pulse-title {
+	margin: 0 0 1em;
+	font-size: 1.25rem;
+	font-weight: 600;
+}
+
+/* Question */
+.ppls-question {
+	margin-bottom: 1.25em;
+}
+.ppls-question-text {
+	margin: 0 0 0.5em;
+	font-weight: 500;
+}
+
+/* Yes/No input + emoji */
+.ppls-question label {
+	display: inline-flex;
+	align-items: center;
+	margin-right: 1em;
+	cursor: pointer;
+}
+.ppls-question input[type="radio"] {
+	margin-right: 0.4em;
+}
+.ppls-emoji {
+	display: inline-block;
+	font-size: 1.4rem;
+	line-height: 1;
+}
+.ppls-emoji[data-emoji="happy"]::before {
+	content: "\1F600";
+}
+
+.ppls-emoji[data-emoji="neutral"]::before {
+	content: "\1F610";
+}
+
+.ppls-emoji[data-emoji="sad"]::before {
+	content: "\1F61E";
+}
+
+/* Text input */
+.ppls-question input[type="text"],
+.ppls-question textarea {
+	width: 100%;
+	padding: 0.5em 0.6em;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 1rem;
+}
+.ppls-question textarea {
+	min-height: 90px;
+	resize: vertical;
+}
+
+/* Submit button */
+.ppls-submit {
+	margin-top: 1em;
+}
+.ppls-submit button {
+	padding: 0.6em 1.2em;
+	font-size: 1rem;
+	border-radius: 4px;
+	border: none;
+	cursor: pointer;
+}
+
+/* Disabled button */
+.ppls-submit button[disabled] {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+/* Success and error messages */
+.ppls-success {
+	padding: 1em;
+	border-radius: 4px;
+	background: #f0f9f0;
+	border: 1px solid #cce5cc;
+}
 .ppls-error {
 	margin-top: 1em;
-	padding: 0.75em;
-	border: 1px solid #f5c2c7;
-	background: #f8d7da;
-	color: #842029;
+	color: #b00020;
+	font-size: 0.95rem;
 }
