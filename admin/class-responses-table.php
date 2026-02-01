@@ -29,6 +29,19 @@ final class Responses_Table extends WP_List_Table {
 		);
 	}
 
+	protected function get_bulk_actions(): array {
+		return [
+			'delete' => __( 'Delete', 'plugiva-pulse' ),
+		];
+	}
+
+	protected function column_cb( $item ): string {
+		return sprintf(
+			'<input type="checkbox" name="response_ids[]" value="%d" />',
+			(int) $item['id']
+		);
+	}
+
 	/**
 	 * Get table columns.
 	 *
@@ -36,7 +49,9 @@ final class Responses_Table extends WP_List_Table {
 	 */
 	public function get_columns(): array {
 		return [
-			'pulse_id'      => __( 'Pulse', 'plugiva-pulse' ),
+			'cb'           	=> '<input type="checkbox" />',
+            'pulse_title'   => __( 'Pulse Title', 'plugiva-pulse' ),
+			'pulse_id'      => __( 'Pulse ID', 'plugiva-pulse' ),
 			'question'      => __( 'Question', 'plugiva-pulse' ),
 			'answer'        => __( 'Answer', 'plugiva-pulse' ),
 			'submitted_at'  => __( 'Submitted', 'plugiva-pulse' ),
@@ -50,6 +65,8 @@ final class Responses_Table extends WP_List_Table {
 	 */
 	public function prepare_items(): void {
 		global $wpdb;
+
+		$this->process_bulk_action();
 
 		$table = $wpdb->prefix . 'ppls_responses';
 
@@ -88,6 +105,32 @@ final class Responses_Table extends WP_List_Table {
 		];
 	}
 
+	public function process_bulk_action(): void {
+		global $wpdb;
+
+		if ( 'delete' !== $this->current_action() ) {
+			return;
+		}
+
+		check_admin_referer( 'bulk-responses' );
+
+		$ids = array_map( 'absint', $_POST['response_ids'] ?? [] );
+
+		if ( empty( $ids ) ) {
+			return;
+		}
+
+		$table = $wpdb->prefix . 'ppls_responses';
+		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$table} WHERE id IN ({$placeholders})",
+				$ids
+			)
+		);
+	}
+
 	/**
 	 * Default column renderer.
 	 *
@@ -98,6 +141,10 @@ final class Responses_Table extends WP_List_Table {
 	protected function column_default( $item, $column_name ): string {
 
 		switch ( $column_name ) {
+            case 'pulse_title':
+	            $title = $this->get_pulse_title( $item['pulse_id'] );
+	            return esc_html( $title );
+
 			case 'pulse_id':
 				return esc_html( $item['pulse_id'] );
 
@@ -113,4 +160,22 @@ final class Responses_Table extends WP_List_Table {
 
 		return '';
 	}
+
+    /**
+     * Get pulse title by ID.
+     *
+     * @param string $pulse_id
+     * @return string
+     */
+    protected function get_pulse_title( string $pulse_id ): string {
+
+        $pulses = get_option( 'ppls_pulses', [] );
+
+        if ( isset( $pulses[ $pulse_id ]['title'] ) ) {
+            return $pulses[ $pulse_id ]['title'];
+        }
+
+        return __( '(Deleted pulse)', 'plugiva-pulse' );
+    }
+
 }

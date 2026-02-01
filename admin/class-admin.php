@@ -13,5 +13,6 @@ final class Admin {
 	public static function init() {
 		Menu::register();
 		Pulses_Page::init();
+		Responses_Page::init();
 	}
 }
