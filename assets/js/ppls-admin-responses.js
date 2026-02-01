@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 
 		const confirmed = window.confirm(
-			pplsResponses.confirmDelete
+			PPLS.i18n.confirmDelete
 		);
 
 		if (!confirmed) {

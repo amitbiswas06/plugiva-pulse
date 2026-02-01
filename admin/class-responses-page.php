@@ -105,9 +105,7 @@ final class Responses_Page {
 
 		wp_add_inline_script(
 			'ppls-admin-responses',
-			'window.pplsResponses = ' . wp_json_encode( [
-				'confirmDelete' => __( 'Are you sure you want to delete selected responses?', 'plugiva-pulse' ),
-			] ),
+			'window.PPLS = ' . wp_json_encode( \Plugiva\Pulse\Plugin::get_js_config() ) . ';',
 			'before'
 		);
 	}

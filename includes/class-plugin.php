@@ -42,4 +42,27 @@ final class Plugin {
 	public function register_shortcodes(): void {
 		Shortcodes::register();
 	}
+
+	/**
+	 * Build shared JS configuration.
+	 *
+	 * @return array
+	 */
+	public static function get_js_config(): array {
+		return apply_filters(
+			'ppls_js_config',
+			[
+				'i18n' => [
+					'confirmDelete' => wp_strip_all_tags(__( 'Are you sure you want to delete selected responses?', 'plugiva-pulse' ) ),
+					'submitting'    => wp_strip_all_tags(__( 'Submitting…', 'plugiva-pulse' ) ),
+					'thank_you'    	=> wp_strip_all_tags(__( 'Thank you for your response!', 'plugiva-pulse' ) ),
+					'error'         => wp_strip_all_tags(__( 'Something went wrong. Please try again.', 'plugiva-pulse' ) ),
+				],
+				'flags' => [
+					'hardDelete' => true,
+				],
+			]
+		);
+	}
+
 }

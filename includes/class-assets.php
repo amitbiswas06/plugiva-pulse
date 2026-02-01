@@ -35,6 +35,12 @@ final class Assets {
 			true
 		);
 
+		wp_add_inline_script(
+			'ppls-frontend',
+			'window.PPLS = ' . wp_json_encode( Plugin::get_js_config() ) . ';',
+			'before'
+		);
+
 		// Optional frontend CSS.
 		wp_enqueue_style(
 			'ppls-frontend',

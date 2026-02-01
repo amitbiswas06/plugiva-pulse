@@ -25,7 +25,7 @@
         if (submitBtn) {
             submitBtn.disabled = true;
             submitBtn.dataset.originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Submitting…';
+            submitBtn.textContent = `${PPLS.i18n.submitting}`;
         }
 
         fetch(url, {
@@ -73,7 +73,7 @@
 
 		wrapper.innerHTML = `
 			<div class="ppls-success">
-				<p>Thank you for your feedback.</p>
+				<p>${PPLS.i18n.thank_you}</p>
 			</div>
 		`;
 	};
@@ -86,7 +86,7 @@
 
 		const error = document.createElement('div');
 		error.className = 'ppls-error';
-		error.innerHTML = '<p>Something went wrong. Please try again.</p>';
+		error.innerHTML = `<p>${PPLS.i18n.error}</p>`;
 
 		form.appendChild(error);
 	};
