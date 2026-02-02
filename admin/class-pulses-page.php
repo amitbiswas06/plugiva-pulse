@@ -17,6 +17,11 @@ final class Pulses_Page {
         add_action( 'admin_notices', [ __CLASS__, 'maybe_show_notice' ] );
     }
 
+    /**
+     * Render pulses page.
+     *
+     * @return void
+     */
 	public static function render_list() {
         if ( isset( $_GET['action'] ) && $_GET['action'] === 'edit' ) {
             self::render_edit();
@@ -27,6 +32,11 @@ final class Pulses_Page {
         require PPLS_PATH . 'admin/views/pulses-list.php';
     }
 
+    /**
+     * Render pulse edit screen.
+     *
+     * @return void
+     */
 	public static function render_edit() {
 
 		$pulse_id = isset( $_GET['pulse'] ) ? sanitize_text_field( wp_unslash( $_GET['pulse'] ) ) : '';
@@ -46,6 +56,11 @@ final class Pulses_Page {
 		require PPLS_PATH . 'admin/views/pulse-edit.php';
 	}
 
+    /**
+     * Handle pulse actions: save, delete, toggle.
+     *
+     * @return void
+     */
 	public static function handle_actions() {
 
         if ( empty( $_POST['ppls_action'] ) ) {
@@ -114,6 +129,11 @@ final class Pulses_Page {
         }
     }
 
+    /**
+     * Maybe show update or deletion notice.
+     *
+     * @return void
+     */
     public static function maybe_show_notice(): void {
         if (
             empty( $_GET['page'] ) ||

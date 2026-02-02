@@ -53,7 +53,7 @@ final class Plugin {
 			'ppls_js_config',
 			[
 				'i18n' => [
-					'confirmDelete' => wp_strip_all_tags(__( 'Are you sure you want to delete selected responses?', 'plugiva-pulse' ) ),
+					'confirmDelete' => wp_strip_all_tags(__( 'Are you sure you want to delete? This action is permanent.', 'plugiva-pulse' ) ),
 					'submitting'    => wp_strip_all_tags(__( 'Submitting…', 'plugiva-pulse' ) ),
 					'thank_you'    	=> wp_strip_all_tags(__( 'Thank you for your response!', 'plugiva-pulse' ) ),
 					'error'         => wp_strip_all_tags(__( 'Something went wrong. Please try again.', 'plugiva-pulse' ) ),

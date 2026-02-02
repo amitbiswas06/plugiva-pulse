@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<div class="wrap">
+<div class="wrap ppls-pulses">
 	<h1>
 		<?php esc_html_e( 'Pulses', 'plugiva-pulse' ); ?>
 		<a href="<?php echo esc_url( admin_url( 'admin.php?page=ppls-pulses&action=edit' ) ); ?>" class="page-title-action">
@@ -15,6 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<thead>
 			<tr>
 				<th><?php esc_html_e( 'Title', 'plugiva-pulse' ); ?></th>
+                <th><?php esc_html_e( 'Pulse ID', 'plugiva-pulse' ); ?></th>
 				<th><?php esc_html_e( 'Visibility', 'plugiva-pulse' ); ?></th>
 				<th><?php esc_html_e( 'Status', 'plugiva-pulse' ); ?></th>
 				<th><?php esc_html_e( 'Questions', 'plugiva-pulse' ); ?></th>
@@ -28,7 +29,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<?php foreach ( $pulses as $pulse ) : ?>
 				<tr>
-                    <td><?php echo esc_html( $pulse['title'] ); ?></td>
+                    <td><strong><span class="row-title"><?php echo esc_html( $pulse['title'] ); ?></span></strong></td>
+                    <td><?php echo esc_html( $pulse['id'] ); ?></td>
                     <td><?php echo esc_html( ucfirst( $pulse['visibility'] ) ); ?></td>
                     <td><?php echo $pulse['enabled'] ? esc_html__( 'Enabled', 'plugiva-pulse' ) : esc_html__( 'Disabled', 'plugiva-pulse' ); ?></td>
                     <td><?php
@@ -38,7 +40,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                     ?></td>
 
                     <td>
-                        <ul class="row-actions">
+                        <ul class="row-pulse-actions">
                             <li>
                                 <a href="<?php echo esc_url( admin_url( 'admin.php?page=ppls-pulses&action=edit&pulse=' . $pulse['id'] ) ); ?>">
                                     <?php esc_html_e( 'Edit', 'plugiva-pulse' ); ?>
@@ -46,7 +48,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                             </li>
 
                             <li>
-                                <form method="post" style="display:inline;">
+                                <form method="post">
                                     <?php wp_nonce_field( 'ppls_pulse_action' ); ?>
                                     <input type="hidden" name="ppls_action" value="toggle">
                                     <input type="hidden" name="pulse_id" value="<?php echo esc_attr( $pulse['id'] ); ?>">
@@ -59,7 +61,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                             </li>
 
                             <li class="delete">
-                                <form method="post" style="display:inline;" onsubmit="return confirm('<?php esc_attr_e( 'Delete this pulse?', 'plugiva-pulse' ); ?>');">
+                                <form method="post" class="ppls-pulse-delete-form">
                                     <?php wp_nonce_field( 'ppls_pulse_action' ); ?>
                                     <input type="hidden" name="ppls_action" value="delete">
                                     <input type="hidden" name="pulse_id" value="<?php echo esc_attr( $pulse['id'] ); ?>">

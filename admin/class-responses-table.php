@@ -29,12 +29,23 @@ final class Responses_Table extends WP_List_Table {
 		);
 	}
 
+	/**
+	 * Get bulk actions.
+	 *
+	 * @return array
+	 */
 	protected function get_bulk_actions(): array {
 		return [
 			'delete' => __( 'Delete', 'plugiva-pulse' ),
 		];
 	}
 
+	/**
+	 * Render checkbox column.
+	 *
+	 * @param array $item
+	 * @return string
+	 */
 	protected function column_cb( $item ): string {
 		return sprintf(
 			'<input type="checkbox" name="response_ids[]" value="%d" />',

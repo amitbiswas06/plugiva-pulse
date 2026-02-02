@@ -17,6 +17,7 @@ final class Assets {
 	 */
 	public static function register(): void {
 		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'enqueue_frontend' ] );
+		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_admin' ] );
 	}
 
 	/**
@@ -31,7 +32,7 @@ final class Assets {
 			'ppls-frontend',
 			PPLS_URL . 'assets/js/ppls-frontend.js',
 			[],
-			microtime(),
+			PPLS_VERSION,
 			true
 		);
 
@@ -46,7 +47,29 @@ final class Assets {
 			'ppls-frontend',
 			PPLS_URL . 'assets/css/ppls-frontend.css',
 			[],
-			microtime()
+			PPLS_VERSION
+		);
+	}
+
+	/**
+	 * Enqueue admin assets.
+	 *
+	 * @return void
+	 */
+	public static function enqueue_admin(): void {
+		
+		wp_enqueue_script(
+			'ppls-admin',
+			PPLS_URL . 'assets/js/ppls-admin.js',
+			[],
+			PPLS_VERSION,
+			true
+		);
+
+		wp_add_inline_script(
+			'ppls-admin',
+			'window.PPLS = ' . wp_json_encode( Plugin::get_js_config() ) . ';',
+			'before'
 		);
 	}
 }

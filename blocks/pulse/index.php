@@ -35,7 +35,7 @@ add_action( 'enqueue_block_editor_assets', function () {
 			'wp-block-editor',
 			'wp-compose',
 		],
-		microtime(),
+		PPLS_VERSION,
 		true
 	);
 } );
