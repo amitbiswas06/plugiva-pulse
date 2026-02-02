@@ -49,7 +49,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
                             <li>
                                 <form method="post">
-                                    <?php wp_nonce_field( 'ppls_pulse_action' ); ?>
+                                    <?php wp_nonce_field( 'ppls_pulse_action', 'ppls_nonce' ); ?>
                                     <input type="hidden" name="ppls_action" value="toggle">
                                     <input type="hidden" name="pulse_id" value="<?php echo esc_attr( $pulse['id'] ); ?>">
                                     <button type="submit" class="link-button">
@@ -62,7 +62,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
                             <li class="delete">
                                 <form method="post" class="ppls-pulse-delete-form">
-                                    <?php wp_nonce_field( 'ppls_pulse_action' ); ?>
+                                    <?php wp_nonce_field( 'ppls_pulse_action', 'ppls_nonce' ); ?>
                                     <input type="hidden" name="ppls_action" value="delete">
                                     <input type="hidden" name="pulse_id" value="<?php echo esc_attr( $pulse['id'] ); ?>">
                                     <button type="submit" class="link-button">

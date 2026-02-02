@@ -59,8 +59,9 @@ final class Submissions {
 		}
 	}
 
+	// Nonce verified once for the entire AJAX payload.
 	private static function verify_nonce(): void {
-		check_ajax_referer( 'ppls_submit', 'nonce' );
+		check_ajax_referer( 'ppls_submit', 'ppls_nonce' );
 	}
 
 	private static function get_payload(): array {
@@ -70,7 +71,7 @@ final class Submissions {
 			: '';
 
 		$answers = isset( $_POST['answers'] ) && is_array( $_POST['answers'] )
-			? array_map( 'sanitize_text_field', wp_unslash( $_POST['answers'] ) )
+			? wp_unslash( $_POST['answers'] )
 			: [];
 
 		$meta = isset( $_POST['meta'] ) && is_array( $_POST['meta'] )
@@ -109,9 +110,14 @@ final class Submissions {
 		}
 
 		// Session hash.
+		// PATCH: sanitize user agent
+		$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] )
+			? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) )
+			: '';
+
 		$expected = hash_hmac(
 			'sha256',
-			$pulse_id . '|' . ( $_SERVER['HTTP_USER_AGENT'] ?? '' ) . '|' . gmdate( 'Y-m-d-H' ),
+			$pulse_id . '|' . $user_agent . '|' . gmdate( 'Y-m-d-H' ),
 			wp_salt()
 		);
 

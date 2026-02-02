@@ -67,14 +67,40 @@ final class Pulses_Page {
             return;
         }
 
-        check_admin_referer( 'ppls_pulse_action' );
+        // PATCH: explicit nonce presence + verification
+		if ( empty( $_POST['ppls_nonce'] ) ) {
+			return;
+		}
+
+        check_admin_referer( 'ppls_pulse_action', 'ppls_nonce' );
 
         switch ( $_POST['ppls_action'] ) {
 
             case 'save':
 
                 if ( isset( $_POST['pulse'] ) && is_array( $_POST['pulse'] ) ) {
+                    
+                    // PATCH: unslash + sanitize array
+
                     $pulse_data = wp_unslash( $_POST['pulse'] );
+
+                    // Sanitize known scalar fields only
+                    $pulse_data['id']         = isset( $pulse_data['id'] )
+                        ? sanitize_text_field( $pulse_data['id'] )
+                        : '';
+
+                    $pulse_data['title']      = isset( $pulse_data['title'] )
+                        ? sanitize_text_field( $pulse_data['title'] )
+                        : '';
+
+                    $pulse_data['visibility'] = isset( $pulse_data['visibility'] )
+                        ? sanitize_text_field( $pulse_data['visibility'] )
+                        : 'public';
+
+                    $pulse_data['enabled']    = ! empty( $pulse_data['enabled'] );
+
+                    // Questions untouched here — validated later
+                    $pulse_data['questions']  = $pulse_data['questions'] ?? [];
 
                     /** 
                      * @var string|\WP_Error $result 

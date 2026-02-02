@@ -17,6 +17,11 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 final class Responses_Table extends WP_List_Table {
 
 	/**
+	 * DB table name suffix (without prefix).
+	 */
+	private const TABLE = 'ppls_responses';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -71,13 +76,14 @@ final class Responses_Table extends WP_List_Table {
 
 	/**
 	 * Prepare table items.
+	 * Custom plugin table (WP_List_Table); direct queries are intentional.
 	 *
 	 * @return void
 	 */
 	public function prepare_items(): void {
 		global $wpdb;
 
-		$table = $wpdb->prefix . 'ppls_responses';
+		$table = $wpdb->prefix . self::TABLE;
 
 		$per_page = 20;
 		$paged    = $this->get_pagenum();

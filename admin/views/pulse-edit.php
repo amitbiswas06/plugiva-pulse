@@ -21,7 +21,7 @@ if ( isset( $_GET['ppls_error'] ) ) : ?>
 	<h1><?php echo $pulse ? esc_html__( 'Edit Pulse', 'plugiva-pulse' ) : esc_html__( 'Add Pulse', 'plugiva-pulse' ); ?></h1>
 
 	<form method="post">
-		<?php wp_nonce_field( 'ppls_pulse_action' ); ?>
+		<?php wp_nonce_field( 'ppls_pulse_action', 'ppls_nonce' ); ?>
         <?php if ( ! empty( $pulse['id'] ) ) : ?>
             <input type="hidden"
                 name="pulse[id]"

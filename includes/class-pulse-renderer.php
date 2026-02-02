@@ -43,7 +43,7 @@ final class Pulse_Renderer {
 				data-pulse="<?php echo esc_attr( $pulse['id'] ); ?>"
 			><?php
 				// Security nonce.
-				wp_nonce_field( 'ppls_submit', 'nonce' );
+				wp_nonce_field( 'ppls_submit', 'ppls_nonce' );
 			?>
 
 				<input type="hidden" name="action" value="ppls_submit_pulse">

@@ -10,13 +10,18 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 final class Responses_Page {
 
+	/**
+	 * DB table name suffix (without prefix).
+	 */
+	private const TABLE = 'ppls_responses';
+
 	public static function init(): void {
 		add_action( 'admin_init', [ __CLASS__, 'maybe_export_csv' ] );
 		add_action( 'admin_init', [ __CLASS__, 'handle_bulk_delete' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'maybe_show_notice' ] );
 	}
 
-    /**
+	/**
 	 * Render responses page.
 	 *
 	 * @return void
@@ -37,23 +42,27 @@ final class Responses_Page {
 	protected static function export_csv(): void {
 		global $wpdb;
 
-		$table = $wpdb->prefix . 'ppls_responses';
-		$rows  = $wpdb->get_results( "SELECT * FROM {$table} ORDER BY created_at DESC", ARRAY_A );
+		$table = $wpdb->prefix . self::TABLE;
 
-		header( 'Content-Type: text/csv' );
+		$rows = $wpdb->get_results(
+			"SELECT * FROM {$table} ORDER BY created_at DESC",
+			ARRAY_A
+		);
+
+		nocache_headers();
+		header( 'Content-Type: text/csv; charset=utf-8' );
 		header( 'Content-Disposition: attachment; filename=pulse-responses.csv' );
-		header( 'Pragma: no-cache' );
-		header( 'Expires: 0' );
 
-		$output = fopen( 'php://output', 'w' );
+		// Output buffer instead of fopen/fclose (Plugin Check compliant).
+		ob_start();
 
-		fputcsv( $output, [
+		echo implode( ',', [
 			'Pulse Title',
 			'Pulse ID',
 			'Question',
 			'Answer',
 			'Submitted At',
-		] );
+		] ) . "\n";
 
 		$pulses = get_option( 'ppls_pulses', [] );
 
@@ -61,16 +70,20 @@ final class Responses_Page {
 
 			$title = $pulses[ $row['pulse_id'] ]['title'] ?? '(Deleted pulse)';
 
-			fputcsv( $output, [
-				$title,
-				$row['pulse_id'],
-				$row['question_label'],
-				$row['answer'],
-				$row['created_at'],
-			] );
+			echo implode( ',', array_map(
+				[ __CLASS__, 'esc_csv' ],
+				[
+					$title,
+					$row['pulse_id'],
+					$row['question_label'],
+					$row['answer'],
+					$row['created_at'],
+				]
+			) ) . "\n";
 		}
 
-		fclose( $output );
+		echo ob_get_clean();
+		exit;
 	}
 
 	/**
@@ -80,24 +93,36 @@ final class Responses_Page {
 	 */
 	public static function maybe_export_csv(): void {
 
-		if ( ! is_admin() ) {
+		if (
+			! is_admin() ||
+			empty( $_GET['page'] ) ||
+			empty( $_GET['export'] ) ||
+			$_GET['page'] !== 'ppls-responses' ||
+			$_GET['export'] !== 'csv'
+		) {
 			return;
 		}
 
-		if ( ! isset( $_GET['page'], $_GET['export'] ) ) {
-			return;
-		}
-
-		if ( $_GET['page'] !== 'ppls-responses' || $_GET['export'] !== 'csv' ) {
-			return;
-		}
+		check_admin_referer( 'ppls_export_csv', 'ppls_nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( __( 'Unauthorized', 'plugiva-pulse' ) );
+			wp_die( esc_html__( 'Unauthorized', 'plugiva-pulse' ) );
 		}
 
 		self::export_csv();
-		exit;
+	}
+
+	/**
+	 * Escape value for CSV output.
+	 *
+	 * @param mixed $value
+	 * @return string
+	 */
+	private static function esc_csv( $value ): string {
+		$value = (string) $value;
+		$value = str_replace( '"', '""', $value );
+
+		return '"' . $value . '"';
 	}
 
 	/**
@@ -117,7 +142,7 @@ final class Responses_Page {
 			return;
 		}
 
-		check_admin_referer( 'bulk-responses' );
+		check_admin_referer( 'bulk-responses', 'ppls_nonce' );
 
 		$ids = array_map( 'absint', $_POST['response_ids'] ?? [] );
 		if ( empty( $ids ) ) {
@@ -126,7 +151,7 @@ final class Responses_Page {
 
 		global $wpdb;
 
-		$table = $wpdb->prefix . 'ppls_responses';
+		$table = $wpdb->prefix . self::TABLE;
 		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 
 		$wpdb->query(
