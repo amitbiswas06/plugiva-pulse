@@ -141,6 +141,7 @@ final class Submissions {
 
 	/* -------------------------------------------------------------------------
 	 * Answer Validation
+	 * Sanitize and validate submitted answers.
 	 * ---------------------------------------------------------------------- */
 
 	private static function validate_answers( array $pulse, array $answers ): void {
@@ -171,23 +172,26 @@ final class Submissions {
 				wp_send_json_error( [ 'message' => 'Invalid answer.' ], 400 );
 			}
 
-			$value = trim( (string) $value );
+			$raw = wp_unslash( (string) $value );
 
 			switch ( $question['type'] ) {
 
 				case 'yesno':
+					$value = sanitize_text_field( $raw );
 					if ( ! in_array( $value, [ 'yes', 'no' ], true ) ) {
 						wp_send_json_error( [ 'message' => 'Invalid answer.' ], 400 );
 					}
 					break;
 
 				case 'emoji':
+					$value = sanitize_text_field( $raw );
 					if ( ! in_array( $value, [ 'happy', 'neutral', 'sad' ], true ) ) {
 						wp_send_json_error( [ 'message' => 'Invalid answer.' ], 400 );
 					}
 					break;
 
 				case 'text':
+					$value = sanitize_textarea_field( $raw );
 					if ( strlen( $value ) > 500 ) {
 						wp_send_json_error( [ 'message' => 'Answer too long.' ], 400 );
 					}

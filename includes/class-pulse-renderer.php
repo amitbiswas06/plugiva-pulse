@@ -200,12 +200,14 @@ final class Pulse_Renderer {
 			case 'text':
 				?>
 				<div class="ppls-input ppls-input-text">
-					<input
-						type="text"
+					<textarea
 						name="<?php echo esc_attr( $name ); ?>"
-						class="ppls-text-input"
-						autocomplete="off"
-					>
+						maxlength="500"
+						aria-describedby="<?php echo esc_attr( $name ); ?>-help"
+					></textarea>
+					<p id="<?php echo esc_attr( $name ); ?>-help" class="ppls-help-text">
+						<?php esc_html_e( 'Up to 500 characters.', 'plugiva-pulse' ); ?>
+					</p>
 				</div>
 				<?php
 				break;

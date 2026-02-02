@@ -79,7 +79,7 @@ final class Responses_Table extends WP_List_Table {
 
 		$table = $wpdb->prefix . 'ppls_responses';
 
-		$per_page = 5;
+		$per_page = 20;
 		$paged    = $this->get_pagenum();
 		$offset   = ( $paged - 1 ) * $per_page;
 
