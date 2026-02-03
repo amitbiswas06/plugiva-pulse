@@ -18,6 +18,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php esc_html_e( 'Export CSV', 'plugiva-pulse' ); ?>
 		</a>
 	</p>
+	<?php if ( ! defined( 'PPLS_PRO_ACTIVE' ) ) : ?>
+		<div class="description" style="margin-top:6px;">
+			<?php
+			esc_html_e(
+				'Plugiva Pulse Pro adds advanced exports like date filtering, pulse-based CSVs, and scheduled delivery.',
+				'plugiva-pulse'
+			);
+			?>
+		</div>
+	<?php endif; ?>
 	<form method="post" id="ppls-responses-form">
 		<?php
 		wp_nonce_field( 'bulk-responses', 'ppls_nonce' );
