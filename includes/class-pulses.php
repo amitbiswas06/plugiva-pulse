@@ -106,7 +106,7 @@ final class Pulses {
 		if ( $title === '' ) {
 			return new \WP_Error(
 				'ppls_missing_title',
-				__( 'Pulse title is required.', 'plugiva-pulse' )
+				esc_html__( 'Pulse title is required.', 'plugiva-pulse' )
 			);
 		}
 
@@ -176,7 +176,7 @@ final class Pulses {
 			if ( $label === '' || ! in_array( $type, $allowed_types, true ) ) {
 				return new \WP_Error(
 					'ppls_invalid_question',
-					__( 'Each question must have both a label and a valid type.', 'plugiva-pulse' )
+					esc_html__( 'Each question must have both a label and a valid type.', 'plugiva-pulse' )
 				);
 			}
 

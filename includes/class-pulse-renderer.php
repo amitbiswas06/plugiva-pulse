@@ -51,10 +51,15 @@ final class Pulse_Renderer {
 
 				<?php
 				$started_at = time();
+				
+				// PATCH: sanitize user agent
+				$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] )
+					? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) )
+					: '';
 
 				$session_hash = hash_hmac(
 					'sha256',
-					$pulse['id'] . '|' . ( $_SERVER['HTTP_USER_AGENT'] ?? '' ) . '|' . gmdate( 'Y-m-d-H' ),
+					$pulse['id'] . '|' . $user_agent . '|' . gmdate( 'Y-m-d-H' ),
 					wp_salt()
 				);
 				?>

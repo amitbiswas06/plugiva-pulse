@@ -56,6 +56,8 @@ final class Responses_Page {
 		// Output buffer instead of fopen/fclose (Plugin Check compliant).
 		ob_start();
 
+		// CSV export: raw output intended (non-HTML), values escaped via esc_csv().
+		
 		echo implode( ',', [
 			'Pulse Title',
 			'Pulse ID',
@@ -70,6 +72,7 @@ final class Responses_Page {
 
 			$title = $pulses[ $row['pulse_id'] ]['title'] ?? '(Deleted pulse)';
 
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			echo implode( ',', array_map(
 				[ __CLASS__, 'esc_csv' ],
 				[
@@ -82,6 +85,7 @@ final class Responses_Page {
 			) ) . "\n";
 		}
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo ob_get_clean();
 		exit;
 	}

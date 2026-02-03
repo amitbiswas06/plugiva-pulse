@@ -16,8 +16,8 @@ final class Menu {
 
 	public static function add_menu() {
 		add_menu_page(
-			__( 'Plugiva Pulse', 'plugiva-pulse' ),
-			__( 'Plugiva Pulse', 'plugiva-pulse' ),
+			esc_html__( 'Plugiva Pulse', 'plugiva-pulse' ),
+			esc_html__( 'Plugiva Pulse', 'plugiva-pulse' ),
 			'manage_options',
 			'ppls-pulses',
 			[ Pulses_Page::class, 'render_list' ],
@@ -26,8 +26,8 @@ final class Menu {
 
 		add_submenu_page(
 			'ppls-pulses',
-			__( 'Pulses', 'plugiva-pulse' ),
-			__( 'Pulses', 'plugiva-pulse' ),
+			esc_html__( 'Pulses', 'plugiva-pulse' ),
+			esc_html__( 'Pulses', 'plugiva-pulse' ),
 			'manage_options',
 			'ppls-pulses',
 			[ Pulses_Page::class, 'render_list' ]
@@ -35,8 +35,8 @@ final class Menu {
 
 		add_submenu_page(
 			'ppls-pulses',
-			__( 'Responses', 'plugiva-pulse' ),
-			__( 'Responses', 'plugiva-pulse' ),
+			esc_html__( 'Responses', 'plugiva-pulse' ),
+			esc_html__( 'Responses', 'plugiva-pulse' ),
 			'manage_options',
 			'ppls-responses',
 			[ Responses_Page::class, 'render_responses' ]

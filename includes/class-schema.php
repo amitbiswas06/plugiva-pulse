@@ -14,6 +14,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Schema {
 
 	/**
+	 * DB table name suffix (without prefix).
+	 */
+	private const TABLE = 'ppls_responses';
+
+	/**
 	 * Create or update database tables.
 	 *
 	 * Runs on plugin activation via dbDelta().
@@ -23,7 +28,7 @@ final class Schema {
 	public static function install() {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . 'ppls_responses';
+		$table_name = $wpdb->prefix . self::TABLE;
 		$charset    = $wpdb->get_charset_collate();
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';

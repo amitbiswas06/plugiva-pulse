@@ -41,7 +41,7 @@ final class Responses_Table extends WP_List_Table {
 	 */
 	protected function get_bulk_actions(): array {
 		return [
-			'delete' => __( 'Delete', 'plugiva-pulse' ),
+			'delete' => esc_html__( 'Delete', 'plugiva-pulse' ),
 		];
 	}
 
@@ -66,11 +66,11 @@ final class Responses_Table extends WP_List_Table {
 	public function get_columns(): array {
 		return [
 			'cb'           	=> '<input type="checkbox" />',
-            'pulse_title'   => __( 'Pulse Title', 'plugiva-pulse' ),
-			'pulse_id'      => __( 'Pulse ID', 'plugiva-pulse' ),
-			'question'      => __( 'Question', 'plugiva-pulse' ),
-			'answer'        => __( 'Answer', 'plugiva-pulse' ),
-			'submitted_at'  => __( 'Submitted', 'plugiva-pulse' ),
+            'pulse_title'   => esc_html__( 'Pulse Title', 'plugiva-pulse' ),
+			'pulse_id'      => esc_html__( 'Pulse ID', 'plugiva-pulse' ),
+			'question'      => esc_html__( 'Question', 'plugiva-pulse' ),
+			'answer'        => esc_html__( 'Answer', 'plugiva-pulse' ),
+			'submitted_at'  => esc_html__( 'Submitted', 'plugiva-pulse' ),
 		];
 	}
 
@@ -164,7 +164,7 @@ final class Responses_Table extends WP_List_Table {
             return $pulses[ $pulse_id ]['title'];
         }
 
-        return __( '(Deleted pulse)', 'plugiva-pulse' );
+        return esc_html__( '(Deleted pulse)', 'plugiva-pulse' );
     }
 
 }

@@ -9,6 +9,8 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
+const PPLS_TABLE_RESPONSES = 'ppls_responses';
+
 // Only remove data if user explicitly opted in.
 $cleanup = get_option( 'ppls_cleanup_on_uninstall', false );
 
@@ -19,7 +21,7 @@ if ( ! $cleanup ) {
 global $wpdb;
 
 // Delete responses table.
-$table = $wpdb->prefix . 'ppls_responses';
+$table = $wpdb->prefix . PPLS_TABLE_RESPONSES;
 $wpdb->query( "DROP TABLE IF EXISTS {$table}" );
 
 // Delete plugin options.
