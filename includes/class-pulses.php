@@ -16,24 +16,22 @@ final class Pulses {
 	const OPTION_KEY = 'ppls_pulses';
 
 	/**
-	 * Get all pulses.
+	 * Get all stored pulses.
 	 *
-	 * @return array
+	 * @return array<string, array> Pulse ID => pulse data
 	 */
-	public static function all() {
+	public static function all(): array {
+
+		// Fetch the option that stores all pulses.
 		$pulses = get_option( self::OPTION_KEY, [] );
 
+		// Safety: if the option was corrupted or stored incorrectly,
+		// always return a predictable array.
 		if ( ! is_array( $pulses ) ) {
 			return [];
 		}
 
-		// Filter out any invalid entries (e.g. WP_Error)
-		return array_filter(
-			$pulses,
-			static function ( $pulse ) {
-				return is_array( $pulse );
-			}
-		);
+		return $pulses;
 	}
 
 	/**
@@ -48,43 +46,57 @@ final class Pulses {
 	}
 
 	/**
-	 * Create or update a pulse.
+	 * Save or update a pulse.
 	 *
-	 * @param array $data
-	 * @return string Pulse ID
+	 * @param array $pulse Pulse data.
+	 * @return string|\WP_Error Pulse ID on success, error on failure.
 	 */
-	public static function save( array $data ) {
-		$pulses   = self::all();
-		$pulse_id = $data['id'] ?? self::generate_id();
+	public static function save( array $pulse ) {
 
-		$validated = self::validate( array_merge( $data, [
-			'id' => $pulse_id,
-		] ) );
+		// Validate and normalize the pulse structure.
+		$pulse = self::validate( $pulse );
 
-		if ( is_wp_error( $validated ) ) {
-			return $validated;
+		if ( is_wp_error( $pulse ) ) {
+			return $pulse;
 		}
 
-		$pulses[ $pulse_id ] = $validated;
+		// Load all existing pulses.
+		$pulses = self::all();
 
-		update_option( self::OPTION_KEY, $pulses, false );
+		// Store or replace this pulse by its ID.
+		// This ensures multiple pulses coexist safely.
+		$pulses[ $pulse['id'] ] = $pulse;
 
-		return $pulse_id;
+		// Persist the full pulse set back to the database.
+		update_option( self::OPTION_KEY, $pulses );
+
+		// Return the pulse ID for redirects / messaging.
+		return $pulse['id'];
 	}
 
 	/**
-	 * Delete a pulse.
+	 * Delete a pulse by ID.
 	 *
-	 * @param string $pulse_id
-	 * @return void
+	 * @param string $id Pulse ID.
+	 * @return bool True on success, false if pulse not found.
 	 */
-	public static function delete( $pulse_id ) {
+	public static function delete( string $id ): bool {
+
+		// Load all existing pulses.
 		$pulses = self::all();
 
-		if ( isset( $pulses[ $pulse_id ] ) ) {
-			unset( $pulses[ $pulse_id ] );
-			update_option( self::OPTION_KEY, $pulses, false );
+		// If the pulse does not exist, do nothing.
+		if ( ! isset( $pulses[ $id ] ) ) {
+			return false;
 		}
+
+		// Remove the pulse from the collection.
+		unset( $pulses[ $id ] );
+
+		// Persist the updated pulse set.
+		update_option( self::OPTION_KEY, $pulses );
+
+		return true;
 	}
 
 	/**
@@ -96,8 +108,10 @@ final class Pulses {
 	private static function validate( array $data ) {
 
 		// --- ID (create vs edit) ---
-		$id = isset( $data['id'] ) && $data['id'] !== ''
-			? sanitize_text_field( $data['id'] )
+		// Existing ID = internal identifier → keep as-is.
+		// Missing ID = new pulse → generate one.
+		$id = ( isset( $data['id'] ) && $data['id'] !== '' )
+			? $data['id']
 			: self::generate_id();
 
 		// --- Title (REQUIRED) ---
@@ -180,8 +194,8 @@ final class Pulses {
 				);
 			}
 
-			$id = isset( $question['id'] ) && $question['id'] !== ''
-				? sanitize_text_field( $question['id'] )
+			$id = ( isset( $question['id'] ) && $question['id'] !== '' )
+				? $question['id']
 				: uniqid( 'q_', false );
 
 			$clean[] = [

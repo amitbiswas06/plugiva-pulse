@@ -66,8 +66,9 @@ final class Submissions {
 
 	private static function get_payload(): array {
 
+		// Pulse ID is an internal identifier — do NOT sanitize like user text.
 		$pulse_id = isset( $_POST['pulse_id'] )
-			? sanitize_text_field( wp_unslash( $_POST['pulse_id'] ) )
+			? wp_unslash( $_POST['pulse_id'] )
 			: '';
 
 		$answers = isset( $_POST['answers'] ) && is_array( $_POST['answers'] )

@@ -39,7 +39,8 @@ final class Pulses_Page {
      */
 	public static function render_edit() {
 
-		$pulse_id = isset( $_GET['pulse'] ) ? sanitize_text_field( wp_unslash( $_GET['pulse'] ) ) : '';
+        // Pulse ID is an internal identifier — do NOT sanitize like user text.
+		$pulse_id = isset( $_GET['pulse'] ) ? wp_unslash( $_GET['pulse'] ) : '';
 		$pulse    = $pulse_id ? Pulses::get( $pulse_id ) : null;
 
         // view always receives an array
@@ -84,10 +85,8 @@ final class Pulses_Page {
 
                     $pulse_data = wp_unslash( $_POST['pulse'] );
 
-                    // Sanitize known scalar fields only
-                    $pulse_data['id']         = isset( $pulse_data['id'] )
-                        ? sanitize_text_field( $pulse_data['id'] )
-                        : '';
+                    // Pulse ID is an internal identifier — do NOT sanitize like user text.
+                    $pulse_data['id'] = $pulse_data['id'] ?? '';
 
                     $pulse_data['title']      = isset( $pulse_data['title'] )
                         ? sanitize_text_field( $pulse_data['title'] )
@@ -130,9 +129,8 @@ final class Pulses_Page {
             case 'delete':
 
                 if ( ! empty( $_POST['pulse_id'] ) ) {
-                    Pulses::delete(
-                        sanitize_text_field( wp_unslash( $_POST['pulse_id'] ) )
-                    );
+                    // Pulse ID is an internal identifier; do not sanitize like user input.
+                    Pulses::delete( wp_unslash( $_POST['pulse_id'] ) );
                 }
 
                 wp_safe_redirect( admin_url( 'admin.php?page=ppls-pulses&ppls_deleted=1' ) );
@@ -141,7 +139,8 @@ final class Pulses_Page {
             case 'toggle':
 
                 if ( ! empty( $_POST['pulse_id'] ) ) {
-                    $pulse_id = sanitize_text_field( wp_unslash( $_POST['pulse_id'] ) );
+                    // Pulse ID is an internal identifier; do not sanitize like user input.
+                    $pulse_id = wp_unslash( $_POST['pulse_id'] );
                     $pulse    = Pulses::get( $pulse_id );
 
                     if ( $pulse ) {
