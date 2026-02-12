@@ -183,14 +183,14 @@ final class Submissions {
 			switch ( $question['type'] ) {
 
 				case 'yesno':
-					$value = sanitize_text_field( $raw );
+					$value = sanitize_key( $raw );
 					if ( ! in_array( $value, [ 'yes', 'no' ], true ) ) {
 						wp_send_json_error( [ 'message' => 'Invalid answer.' ], 400 );
 					}
 					break;
 
 				case 'emoji':
-					$value = sanitize_text_field( $raw );
+					$value = sanitize_key( $raw );
 					if ( ! in_array( $value, [ 'happy', 'neutral', 'sad' ], true ) ) {
 						wp_send_json_error( [ 'message' => 'Invalid answer.' ], 400 );
 					}

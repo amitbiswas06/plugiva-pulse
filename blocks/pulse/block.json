@@ -1,5 +1,5 @@
 {
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "plugiva/pulse",
 	"title": "Pulse",
 	"description": "Display a Plugiva Pulse.",

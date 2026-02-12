@@ -111,7 +111,7 @@ final class Pulses {
 		// Existing ID = internal identifier → keep as-is.
 		// Missing ID = new pulse → generate one.
 		$id = ( isset( $data['id'] ) && $data['id'] !== '' )
-			? $data['id']
+			? sanitize_key( $data['id'] )
 			: self::generate_id();
 
 		// --- Title (REQUIRED) ---
@@ -125,12 +125,16 @@ final class Pulses {
 		}
 
 		// --- Visibility ---
+		$raw_visibility = isset( $data['visibility'] )
+			? sanitize_key( $data['visibility'] )
+			: 'public';
+
 		$visibility = in_array(
-			$data['visibility'] ?? 'public',
+			$raw_visibility,
 			[ 'public', 'admin' ],
 			true
 		)
-			? $data['visibility']
+			? $raw_visibility
 			: 'public';
 
 		// --- Enabled flag ---
