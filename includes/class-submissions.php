@@ -66,13 +66,12 @@ final class Submissions {
 
 	private static function get_payload(): array {
 
-		// Pulse ID is an internal identifier — do NOT sanitize like user text.
 		$pulse_id = isset( $_POST['pulse_id'] )
-			? wp_unslash( $_POST['pulse_id'] )
+			? sanitize_key( wp_unslash( $_POST['pulse_id'] ) )
 			: '';
 
 		$answers = isset( $_POST['answers'] ) && is_array( $_POST['answers'] )
-			? wp_unslash( $_POST['answers'] )
+			? array_map( 'sanitize_text_field', wp_unslash( $_POST['answers'] ) )
 			: [];
 
 		$meta = isset( $_POST['meta'] ) && is_array( $_POST['meta'] )
@@ -219,52 +218,56 @@ final class Submissions {
      */
     private static function store_responses( array $pulse, array $answers, string $session_hash ): void {
 
-        global $wpdb;
+		global $wpdb;
 
-        $table = $wpdb->prefix . 'ppls_responses';
+		$table = $wpdb->prefix . 'ppls_responses';
 
-        $questions = isset( $pulse['questions'] ) && is_array( $pulse['questions'] )
-            ? array_values( $pulse['questions'] )
-            : [];
+		$questions = isset( $pulse['questions'] ) && is_array( $pulse['questions'] )
+			? array_values( $pulse['questions'] )
+			: [];
 
-        $now = current_time( 'mysql' );
+		$now = current_time( 'mysql' );
 
-        foreach ( $questions as $index => $question ) {
+		// Normalize identifiers before DB write.
+		$pulse_id     = sanitize_key( $pulse['id'] );
+		$session_hash = sanitize_key( $session_hash );
 
-            $key = 'q' . $index;
+		foreach ( $questions as $index => $question ) {
 
-            if ( ! array_key_exists( $key, $answers ) ) {
-                continue; // Question not answered (allowed in MVP).
-            }
+			$key = 'q' . $index;
 
-            $value = trim( (string) $answers[ $key ] );
+			if ( ! array_key_exists( $key, $answers ) ) {
+				continue;
+			}
+
+			$value = trim( (string) $answers[ $key ] );
 
 			if ( $value === '' ) {
 				continue;
 			}
 
-            $wpdb->insert(
-                $table,
-                [
-                    'pulse_id'       => $pulse['id'],
-                    'question_index' => $index,
-                    'question_label' => $question['label'],
-                    'question_type'  => $question['type'],
-                    'answer'         => $value,
-                    'session_hash'   => $session_hash,
-                    'created_at'     => $now,
-                ],
-                [
-                    '%s', // pulse_id
-                    '%d', // question_index
-                    '%s', // question_label
-                    '%s', // question_type
-                    '%s', // answer
-                    '%s', // session_hash
-                    '%s', // created_at
-                ]
-            );
-        }
-    }
+			$wpdb->insert(
+				$table,
+				[
+					'pulse_id'       => $pulse_id,
+					'question_index' => (int) $index,
+					'question_label' => sanitize_text_field( $question['label'] ),
+					'question_type'  => sanitize_key( $question['type'] ),
+					'answer'         => $value, // already sanitized in validate_answers()
+					'session_hash'   => $session_hash,
+					'created_at'     => $now,
+				],
+				[
+					'%s',
+					'%d',
+					'%s',
+					'%s',
+					'%s',
+					'%s',
+					'%s',
+				]
+			);
+		}
+	}
 
 }

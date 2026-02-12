@@ -33,7 +33,7 @@ final class Shortcodes {
 		);
 
 		$pulse_id = isset( $atts['id'] )
-			? preg_replace( '/[^a-zA-Z0-9_]/', '', $atts['id'] )
+			? sanitize_key( $atts['id'] )
 			: '';
 
 		if ( $pulse_id === '' ) {

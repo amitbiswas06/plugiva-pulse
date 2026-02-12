@@ -39,8 +39,7 @@ final class Pulses_Page {
      */
 	public static function render_edit() {
 
-        // Pulse ID is an internal identifier — do NOT sanitize like user text.
-		$pulse_id = isset( $_GET['pulse'] ) ? wp_unslash( $_GET['pulse'] ) : '';
+		$pulse_id = isset( $_GET['pulse'] ) ? sanitize_key( wp_unslash( $_GET['pulse'] ) ) : '';
 		$pulse    = $pulse_id ? Pulses::get( $pulse_id ) : null;
 
         // view always receives an array
@@ -85,10 +84,12 @@ final class Pulses_Page {
 
                     $pulse_data = wp_unslash( $_POST['pulse'] );
 
-                    // Pulse ID is an internal identifier — do NOT sanitize like user text.
-                    $pulse_data['id'] = $pulse_data['id'] ?? '';
+                    // Pulse ID
+                    $pulse_data['id'] = isset( $pulse_data['id'] )
+                        ? sanitize_key( $pulse_data['id'] )
+                        : '';
 
-                    $pulse_data['title']      = isset( $pulse_data['title'] )
+                    $pulse_data['title'] = isset( $pulse_data['title'] )
                         ? sanitize_text_field( $pulse_data['title'] )
                         : '';
 
@@ -96,10 +97,10 @@ final class Pulses_Page {
                         ? sanitize_text_field( $pulse_data['visibility'] )
                         : 'public';
 
-                    $pulse_data['enabled']    = ! empty( $pulse_data['enabled'] );
+                    $pulse_data['enabled'] = ! empty( $pulse_data['enabled'] );
 
                     // Questions untouched here — validated later
-                    $pulse_data['questions']  = $pulse_data['questions'] ?? [];
+                    $pulse_data['questions'] = $pulse_data['questions'] ?? [];
 
                     /** 
                      * @var string|\WP_Error $result 
@@ -129,8 +130,9 @@ final class Pulses_Page {
             case 'delete':
 
                 if ( ! empty( $_POST['pulse_id'] ) ) {
-                    // Pulse ID is an internal identifier; do not sanitize like user input.
-                    Pulses::delete( wp_unslash( $_POST['pulse_id'] ) );
+                    Pulses::delete(
+                        sanitize_key( wp_unslash( $_POST['pulse_id'] ) )
+                    );
                 }
 
                 wp_safe_redirect( admin_url( 'admin.php?page=ppls-pulses&ppls_deleted=1' ) );
@@ -139,8 +141,7 @@ final class Pulses_Page {
             case 'toggle':
 
                 if ( ! empty( $_POST['pulse_id'] ) ) {
-                    // Pulse ID is an internal identifier; do not sanitize like user input.
-                    $pulse_id = wp_unslash( $_POST['pulse_id'] );
+                    $pulse_id = sanitize_key( wp_unslash( $_POST['pulse_id'] ) );
                     $pulse    = Pulses::get( $pulse_id );
 
                     if ( $pulse ) {

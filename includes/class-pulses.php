@@ -195,7 +195,7 @@ final class Pulses {
 			}
 
 			$id = ( isset( $question['id'] ) && $question['id'] !== '' )
-				? $question['id']
+				? sanitize_key( $question['id'] )
 				: uniqid( 'q_', false );
 
 			$clean[] = [
