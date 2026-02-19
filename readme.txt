@@ -1,6 +1,6 @@
 === Plugiva Pulse ===
 Contributors: amitbiswas06
-Tags: feedback, surveys, forms, polls, ajax
+Tags: feedback, poll, survey, questionnaire, engagement
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
@@ -8,13 +8,13 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Lightweight feedback and pulse collection plugin with admin-managed questions and clean frontend submission.
+Create lightweight feedback forms and quick polls with yes/no, emoji, and text responses inside WordPress.
 
 == Description ==
 
-Plugiva Pulse lets you create simple “pulses” — short feedback or question sets — and collect responses through a clean frontend form.
+Plugiva Pulse lets you create lightweight feedback forms and quick polls directly inside WordPress. Build simple pulses using yes/no, emoji, or short text questions and collect responses through a clean AJAX-powered frontend form.
 
-It is designed to be lightweight, privacy-conscious, and easy to manage from the WordPress admin without relying on third-party services.
+It is designed to be privacy-conscious and easy to manage from the WordPress admin without relying on third-party services.
 
 ### Key Features
 

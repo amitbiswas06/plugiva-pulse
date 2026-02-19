@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Plugiva Pulse
- * Description: Lightweight feedback pulses for WordPress.
+ * Description: Create lightweight feedback forms and quick polls with yes/no, emoji, and text responses inside WordPress.
  * Version:     1.0.0
  * Author:      Plugiva
  * Author URI:  https://plugiva.com
