@@ -22,6 +22,14 @@ final class Responses_Table extends WP_List_Table {
 	private const TABLE = 'ppls_responses';
 
 	/**
+	 * Last seen datetime.
+	 *
+	 * @var string
+	 * @since 1.1.0
+	 */
+	protected $last_seen;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -32,6 +40,34 @@ final class Responses_Table extends WP_List_Table {
 				'ajax'     => false,
 			]
 		);
+
+		// update the responses seen option
+		// @since 1.1.0
+		$this->last_seen = get_option( 'ppls_last_seen_responses', '' );
+
+		if ( empty( $this->last_seen ) ) {
+			$this->last_seen = current_time( 'mysql' );
+		}
+	}
+
+	/**
+	 * Render a single row.
+	 *
+	 * @param array $item
+	 * @return void
+	 * @since 1.1.0
+	 */
+	public function single_row( $item ) {
+
+		$created_at = $item['created_at'] ?? '';
+
+		$is_new = ( ! empty( $created_at ) && $created_at > $this->last_seen );
+
+		$class = $is_new ? 'ppls-row-new' : '';
+
+		echo '<tr class="' . esc_attr( $class ) . '">';
+		$this->single_row_columns( $item );
+		echo '</tr>';
 	}
 
 	/**

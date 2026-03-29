@@ -16,6 +16,27 @@ final class Pulses {
 	const OPTION_KEY = 'ppls_pulses';
 
 	/**
+	 * Get count of new responses since last seen datetime.
+	 *
+	 * @param string $last_seen MySQL datetime string.
+	 * @return int
+	 * @since 1.1.0
+	 */
+	public static function get_new_responses_count( string $last_seen ): int {
+		global $wpdb;
+
+		$table = $wpdb->prefix . 'ppls_responses';
+
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$table} WHERE created_at > %s",
+				$last_seen
+			)
+		);
+	}
+
+
+	/**
 	 * Get all stored pulses.
 	 *
 	 * @return array<string, array> Pulse ID => pulse data

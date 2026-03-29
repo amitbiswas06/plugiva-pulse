@@ -31,6 +31,10 @@ final class Responses_Page {
 		$table = new Responses_Table();
 		$table->prepare_items();
 
+		// Mark responses as seen AFTER rendering logic. 
+		// @since 1.1.0
+		update_option( 'ppls_last_seen_responses', current_time( 'mysql' ) );
+
 		require PPLS_PATH . 'admin/views/responses-page.php';
 	}
 

@@ -27,3 +27,5 @@ $wpdb->query( "DROP TABLE IF EXISTS {$table}" );
 // Delete plugin options.
 delete_option( 'ppls_pulses' );
 delete_option( 'ppls_cleanup_on_uninstall' );
+// @since 1.1.0
+delete_option( 'ppls_last_seen_responses' );

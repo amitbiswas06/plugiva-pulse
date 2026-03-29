@@ -4,7 +4,7 @@ Tags: feedback, poll, survey, questionnaire, engagement
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,7 @@ It is designed to be privacy-conscious and easy to manage from the WordPress adm
 * Spam protection built in
 * Admin responses table with pagination
 * Bulk delete responses
+* See new responses instantly with admin notification bubble
 * CSV export of collected responses
 * Clean uninstall (optional data removal)
 
@@ -77,6 +78,11 @@ Yes. The plugin includes a clean uninstall routine to remove stored data.
 5. CSV export
 
 == Changelog ==
+
+= 1.1.0 =
+* New: Admin "New Responses" bubble in menu
+* New: Highlight new responses in admin table
+* Improved: Better visibility of incoming feedback
 
 = 1.0.0 =
 * Initial release
