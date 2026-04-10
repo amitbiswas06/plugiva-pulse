@@ -123,14 +123,14 @@ final class Submissions {
 		}
 
 		return [
-			'type'     => $type,
+			'type'     => $type, // 'pulse' or 'question'
 			'pulse_id' => $pulse_id,
 			'answers'  => $answers,
 			'meta'     => $meta,
 
 			// NEW (inline support)
 			// @since 1.2.0
-			'q_type'   => $q_type,
+			'q_type'   => $q_type, // question type (e.g., 'yesno', 'emoji', 'rating (custom)')
 			'qid'      => $qid,
 			'question' => $question,
 			'answer'   => $answer,
@@ -327,6 +327,7 @@ final class Submissions {
 			];
 
 			// Only include post_id if valid
+			// @since 1.2.0
 			if ( $post_id > 0 ) {
 				$data['post_id'] = $post_id;
 				array_splice( $formats, 1, 0, '%d' );
@@ -364,14 +365,8 @@ final class Submissions {
 			wp_send_json_error( [ 'message' => 'Invalid request.' ], 400 );
 		}
 
-		// Validate answer (basic)
+		// Validate answer against allowed options for the question type.
 		$allowed = Inline_Utils::get_allowed_answers( $q_type );
-
-error_log( 'QTYPE: ' . print_r( $q_type, true ) );
-error_log( 'ANSWER RAW: ' . print_r( $payload['answer'], true ) );
-error_log( 'ANSWER FINAL: ' . print_r( $answer, true ) );
-error_log( 'ALLOWED: ' . print_r( $allowed, true ) );
-error_log( 'CHECK: ' . ( in_array( $answer, $allowed, true ) ? 'YES' : 'NO' ) );
 
 		if ( empty( $allowed ) || ! in_array( $answer, $allowed, true ) ) {
 			wp_send_json_error( [ 'message' => 'Invalid answer.' ], 400 );

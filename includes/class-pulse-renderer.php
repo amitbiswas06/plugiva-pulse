@@ -244,65 +244,34 @@ final class Pulse_Renderer {
 
 
 	/**
-	 * Filter the inline question options (button values and labels/icons).
+	 * Render inline question shortcode.
 	 *
-	 * Allows developers to modify or replace the available options
-	 * for inline questions such as yes/no or emoji sets.
+	 * Outputs a lightweight inline feedback UI that allows users to respond
+	 * instantly (no submit button) via AJAX.
 	 *
-	 * Each option key is submitted as the response value, and the label
-	 * may be plain text, emoji, or an icon string.
+	 * Features:
+	 * - Supports predefined and custom question types via `ppls_inline_options`
+	 * - One-click submission with instant feedback
+	 * - Secure payload using nonce, hash, and timestamp
+	 * - Prevents duplicate submissions via session hash
+	 * - Fully extensible UI (options + feedback message)
 	 *
-	 * Example usage:
+	 * Shortcode:
+	 * [ppls_question q="Your question?" type="yesno|emoji|custom" id="optional_id"]
 	 *
-	 * add_filter( 'ppls_inline_options', function( $options ) {
+	 * Attributes:
+	 * - q    (string) Required. Question text.
+	 * - type (string) Optional. Question type. Defaults to 'yesno'.
+	 * - id   (string) Optional. Custom identifier for grouping.
 	 *
-	 *     // Replace yes/no with text labels
-	 *     $options['yesno'] = [
-	 *         'yes' => 'Yes',
-	 *         'no'  => 'No',
-	 *     ];
-	 *
-	 *     // Customize emoji set
-	 *     $options['emoji'] = [
-	 *         'happy'   => '😄',
-	 *         'neutral' => '😐',
-	 *         'sad'     => '😢',
-	 *     ];
-	 *
-	 *     // Add a custom type (can be used via shortcode type="rating")
-	 *     $options['rating'] = [
-	 *         '1' => '⭐',
-	 *         '2' => '⭐⭐',
-	 *         '3' => '⭐⭐⭐',
-	 *         '4' => '⭐⭐⭐⭐',
-	 *         '5' => '⭐⭐⭐⭐⭐',
-	 *     ];
-	 *
-	 *     return $options;
-	 * });
+	 * Filters:
+	 * - ppls_inline_options  Modify available question types and options.
+	 * - ppls_inline_feedback Modify feedback message (icon + text).
 	 *
 	 * @since 1.2.0
 	 *
-	 * @param array $options {
-	 *     Array of option groups keyed by type.
-	 *
-	 *     @type array $yesno {
-	 *         Yes/No options.
-	 *
-	 *         @type string $yes Label or icon for "yes".
-	 *         @type string $no  Label or icon for "no".
-	 *     }
-	 *
-	 *     @type array $emoji {
-	 *         Emoji reaction options.
-	 *
-	 *         @type string $happy   Label or icon for "happy".
-	 *         @type string $neutral Label or icon for "neutral".
-	 *         @type string $sad     Label or icon for "sad".
-	 *     }
-	 * }
-	 *
-	 * @return array Modified options array.
+	 * @param array $atts Shortcode attributes.
+	 * @return string Rendered HTML output.
 	 */
 	public static function render_question_shortcode( $atts ): string {
 
@@ -350,19 +319,22 @@ final class Pulse_Renderer {
 			wp_salt()
 		);
 
-		// --- Options (filterable) ---
-		$options = Inline_Utils::get_options();
-
 		// Feedback (filterable)
-		$feedback = apply_filters(
-			'ppls_inline_feedback',
+		$feedback = wp_parse_args(
+			apply_filters(
+				'ppls_inline_feedback',
+				[
+					'icon' => '✓',
+					'text' => __( 'Thanks', 'plugiva-pulse' ),
+				]
+			),
 			[
 				'icon' => '✓',
 				'text' => __( 'Thanks', 'plugiva-pulse' ),
 			]
 		);
 
-		$current = isset( $options[ $type ] ) ? $options[ $type ] : $options['yesno'];
+		$current = $options[ $type ];
 
 		ob_start();
 		?>
@@ -391,7 +363,7 @@ final class Pulse_Renderer {
 						data-value="<?php echo esc_attr( $value ); ?>"
 					>
 						<span class="ppls-option-label">
-							<?php echo esc_html( Inline_Utils::get_label( $label ) ); ?>
+							<?php echo wp_kses_post( Inline_Utils::get_label( $label ) ); ?>
 						</span>
 					</button>
 				<?php endforeach; ?>

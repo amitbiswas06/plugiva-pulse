@@ -27,7 +27,7 @@ class Inline_Utils {
 	 */
 	public static function get_options(): array {
 
-		return apply_filters(
+		$options = apply_filters(
 			'ppls_inline_options',
 			[
 				'yesno' => [
@@ -41,6 +41,23 @@ class Inline_Utils {
 				],
 			]
 		);
+
+		$sanitized = [];
+
+		foreach ( $options as $type => $items ) {
+
+			$type = sanitize_key( $type );
+
+			if ( ! is_array( $items ) ) {
+				continue;
+			}
+
+			foreach ( $items as $key => $value ) {
+				$sanitized[ $type ][ sanitize_key( $key ) ] = $value;
+			}
+		}
+
+		return $sanitized;
 	}
 
 	/**

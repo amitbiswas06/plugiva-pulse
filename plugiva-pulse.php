@@ -27,6 +27,8 @@ add_action( 'plugins_loaded', function () {
 	\Plugiva\Pulse\Plugin::instance();
 } );
 
+// Database schema update on admin init.
+// @since 1.2.0
 add_action( 'admin_init', function () {
 
 	$installed = get_option( 'ppls_db_version' );
@@ -41,6 +43,7 @@ add_action( 'admin_init', function () {
 	update_option( 'ppls_db_version', PPLS_DB_VERSION );
 });
 
+// Initial installation hook to set up database schema.
 register_activation_hook(
 	__FILE__,
 	function () {
