@@ -27,6 +27,14 @@ final class Assets {
 	 */
 	public static function enqueue_frontend(): void {
 
+		wp_enqueue_script(
+			'ppls-inline',
+			PPLS_URL . 'assets/js/ppls-inline.js',
+			[],
+			microtime(), //PPLS_VERSION,
+			true
+		);
+
 		// Frontend JS.
 		wp_enqueue_script(
 			'ppls-frontend',

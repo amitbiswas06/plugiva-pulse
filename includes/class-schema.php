@@ -33,10 +33,12 @@ final class Schema {
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
+		// v1.2.0 update: add post_id for better integration with WordPress content
 		$sql = "
 			CREATE TABLE {$table_name} (
 				id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 				pulse_id VARCHAR(64) NOT NULL,
+				post_id BIGINT UNSIGNED NULL,
 				question_index TINYINT UNSIGNED NOT NULL,
 				question_label VARCHAR(255) NOT NULL,
 				question_type VARCHAR(20) NOT NULL,
@@ -45,6 +47,7 @@ final class Schema {
 				created_at DATETIME NOT NULL,
 				PRIMARY KEY (id),
 				KEY pulse_id (pulse_id),
+				KEY post_id (post_id),
 				KEY session_hash (session_hash),
 				KEY created_at (created_at)
 			) {$charset};

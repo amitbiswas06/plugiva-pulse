@@ -34,17 +34,30 @@ final class Submissions {
 		$payload = self::get_payload();
 
 		self::validate_spam( $payload );
-		$pulse = self::validate_pulse( $payload['pulse_id'] );
-		self::validate_answers( 
-            $pulse, 
-            $payload['answers'] 
-        );
 
-        self::store_responses( 
-            $pulse, 
-            $payload['answers'], 
-            $payload['meta']['hash'] 
-        );
+		// NEW: route based on type
+		// For backward compatibility, default to 'pulse' if type is missing.
+		// @since 1.2.0
+		if ( isset( $payload['type'] ) && $payload['type'] === 'question' ) {
+
+			self::handle_inline_question( $payload );
+
+		} else {
+
+			$pulse = self::validate_pulse( $payload['pulse_id'] );
+
+			self::validate_answers(
+				$pulse,
+				$payload['answers']
+			);
+
+			self::store_responses(
+				$pulse,
+				$payload['answers'],
+				$payload['meta']['hash'],
+				get_the_ID() ?: 0
+			);
+		}
 
 		wp_send_json_success( [ 'received' => true ] );
 	}
@@ -78,14 +91,50 @@ final class Submissions {
 			? array_map( 'sanitize_text_field', wp_unslash( $_POST['meta'] ) )
 			: [];
 
-		if ( empty( $pulse_id ) ) {
-			wp_send_json_error( [ 'message' => 'Missing pulse.' ], 400 );
+		// NEW (inline support)
+		// @since 1.2.0
+		$type = isset( $_POST['type'] )
+			? sanitize_key( wp_unslash( $_POST['type'] ) )
+			: 'pulse'; // default to 'pulse' for backward compatibility
+
+		$q_type = isset( $_POST['q_type'] ) && $_POST['q_type'] !== ''
+			? sanitize_key( wp_unslash( $_POST['q_type'] ) )
+			: 'yesno';
+
+		$qid = isset( $_POST['qid'] )
+			? sanitize_text_field( wp_unslash( $_POST['qid'] ) )
+			: '';
+
+		$question = isset( $_POST['question'] )
+			? sanitize_text_field( wp_unslash( $_POST['question'] ) )
+			: '';
+
+		$answer = isset( $_POST['answer'] )
+			? sanitize_text_field( wp_unslash( $_POST['answer'] ) )
+			: '';
+
+		$post_id = isset( $_POST['post_id'] )
+			? absint( wp_unslash( $_POST['post_id'] ) )
+			: 0;
+		
+
+		if ( empty( $pulse_id ) && empty( $qid ) ) {
+			wp_send_json_error( [ 'message' => 'Missing identifier.' ], 400 );
 		}
 
 		return [
+			'type'     => $type,
 			'pulse_id' => $pulse_id,
 			'answers'  => $answers,
 			'meta'     => $meta,
+
+			// NEW (inline support)
+			// @since 1.2.0
+			'q_type'   => $q_type,
+			'qid'      => $qid,
+			'question' => $question,
+			'answer'   => $answer,
+			'post_id'  => $post_id,
 		];
 	}
 
@@ -96,7 +145,9 @@ final class Submissions {
 	private static function validate_spam( array $payload ): void {
 
 		$meta     = $payload['meta'];
-		$pulse_id = $payload['pulse_id'];
+		$identifier = ! empty( $payload['pulse_id'] )
+			? $payload['pulse_id']
+			: $payload['qid'];
 
 		// Honeypot.
 		if ( ! empty( $meta['ppls_hp'] ) ) {
@@ -117,11 +168,15 @@ final class Submissions {
 
 		$expected = hash_hmac(
 			'sha256',
-			$pulse_id . '|' . $user_agent . '|' . gmdate( 'Y-m-d-H' ),
+			$identifier . '|' . $user_agent . '|' . gmdate( 'Y-m-d-H' ),
 			wp_salt()
 		);
 
-		if ( empty( $meta['hash'] ) || ! hash_equals( $expected, $meta['hash'] ) ) {
+		$received_hash = isset( $meta['hash'] )
+			? sanitize_text_field( $meta['hash'] )
+			: '';
+
+		if ( empty( $received_hash ) || ! hash_equals( $expected, $received_hash ) ) {
 			wp_send_json_error( [ 'message' => 'Invalid session.' ], 403 );
 		}
 	}
@@ -216,7 +271,12 @@ final class Submissions {
      * @param array $answers Submitted answers.
      * @return void
      */
-    private static function store_responses( array $pulse, array $answers, string $session_hash ): void {
+    private static function store_responses(
+		array $pulse,
+		array $answers,
+		string $session_hash,
+		int $post_id = 0
+	): void {
 
 		global $wpdb;
 
@@ -246,28 +306,119 @@ final class Submissions {
 				continue;
 			}
 
-			$wpdb->insert(
-				$table,
-				[
-					'pulse_id'       => $pulse_id,
-					'question_index' => (int) $index,
-					'question_label' => sanitize_text_field( $question['label'] ),
-					'question_type'  => sanitize_key( $question['type'] ),
-					'answer'         => $value, // already sanitized in validate_answers()
-					'session_hash'   => $session_hash,
-					'created_at'     => $now,
-				],
-				[
-					'%s',
-					'%d',
-					'%s',
-					'%s',
-					'%s',
-					'%s',
-					'%s',
-				]
-			);
+			$data = [
+				'pulse_id'       => $pulse_id,
+				'question_index' => (int) $index,
+				'question_label' => sanitize_text_field( $question['label'] ),
+				'question_type'  => sanitize_key( $question['type'] ),
+				'answer'         => $value,
+				'session_hash'   => $session_hash,
+				'created_at'     => $now,
+			];
+
+			$formats = [
+				'%s',
+				'%d',
+				'%s',
+				'%s',
+				'%s',
+				'%s',
+				'%s',
+			];
+
+			// Only include post_id if valid
+			if ( $post_id > 0 ) {
+				$data['post_id'] = $post_id;
+				array_splice( $formats, 1, 0, '%d' );
+			}
+
+			$wpdb->insert( $table, $data, $formats );
 		}
+
+	}
+
+
+	/**
+	 * Handle inline question submission.
+	 *
+	 * @param array $payload Request payload.
+	 * @return void
+	 * @since 1.2.0
+	 */
+	private static function handle_inline_question( array $payload ): void {
+
+		global $wpdb;
+
+		$qid      = sanitize_key( $payload['qid'] );
+		$question = sanitize_text_field( $payload['question'] );
+
+		$answer = isset( $payload['answer'] )
+			? (string) sanitize_key( $payload['answer'] )
+			: '';
+
+		$post_id  = (int) $payload['post_id'];
+		$hash     = sanitize_key( $payload['meta']['hash'] );
+		$q_type   = sanitize_key( $payload['q_type'] );
+
+		if ( $qid === '' || $answer === '' ) {
+			wp_send_json_error( [ 'message' => 'Invalid request.' ], 400 );
+		}
+
+		// Validate answer (basic)
+		$allowed = Inline_Utils::get_allowed_answers( $q_type );
+
+error_log( 'QTYPE: ' . print_r( $q_type, true ) );
+error_log( 'ANSWER RAW: ' . print_r( $payload['answer'], true ) );
+error_log( 'ANSWER FINAL: ' . print_r( $answer, true ) );
+error_log( 'ALLOWED: ' . print_r( $allowed, true ) );
+error_log( 'CHECK: ' . ( in_array( $answer, $allowed, true ) ? 'YES' : 'NO' ) );
+
+		if ( empty( $allowed ) || ! in_array( $answer, $allowed, true ) ) {
+			wp_send_json_error( [ 'message' => 'Invalid answer.' ], 400 );
+		}
+
+		$table = $wpdb->prefix . 'ppls_responses';
+
+		// Prevent duplicates
+		$exists = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$table} 
+				WHERE pulse_id = %s 
+				AND session_hash = %s 
+				AND post_id = %d",
+				$qid,
+				$hash,
+				$post_id
+			)
+		);
+
+		if ( $exists ) {
+			return; // silently ignore
+		}
+
+		$wpdb->insert(
+			$table,
+			[
+				'pulse_id'       => $qid,
+				'post_id'        => $post_id,
+				'question_index' => 0,
+				'question_label' => $question,
+				'question_type'  => 'inline',
+				'answer'         => $answer,
+				'session_hash'   => $hash,
+				'created_at'     => current_time( 'mysql' ),
+			],
+			[
+				'%s',
+				'%d',
+				'%d',
+				'%s',
+				'%s',
+				'%s',
+				'%s',
+				'%s',
+			]
+		);
 	}
 
 }

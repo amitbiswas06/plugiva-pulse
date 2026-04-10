@@ -14,6 +14,10 @@ final class Shortcodes {
 	 */
 	public static function register(): void {
 		add_shortcode( 'ppls_pulse', [ __CLASS__, 'render_pulse' ] );
+
+		// NEW: Inline question shortcode
+		// @since 1.2.0
+		add_shortcode( 'ppls_question', [ __CLASS__, 'render_question' ] );
 	}
 
 	/**
@@ -47,4 +51,17 @@ final class Shortcodes {
 			]
 		);
 	}
+
+	/**
+	 * Shortcode callback for inline question.
+	 *
+	 * @param array $atts Shortcode attributes.
+	 * @return string
+	 * @since 1.2.0
+	 */
+	public static function render_question( array $atts ): string {
+
+		return Pulse_Renderer::render_question_shortcode( $atts );
+	}
+
 }

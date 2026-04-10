@@ -219,4 +219,197 @@ final class Pulse_Renderer {
 		}
 	}
 
+
+	/**
+	 * Generate a stable question ID (qid).
+	 *
+	 * @param string $question Question text.
+	 * @param int    $post_id  Post ID.
+	 * @return string
+	 * @since 1.2.0
+	 */
+	private static function generate_qid( string $question, int $post_id ): string {
+
+		$q = trim( $question );
+		$q = wp_strip_all_tags( $q );
+		$q = strtolower( $q );
+		$q = preg_replace( '/\s+/', ' ', $q );
+
+		return hash_hmac(
+			'sha256',
+			$q . '|' . $post_id,
+			wp_salt()
+		);
+	}
+
+
+	/**
+	 * Filter the inline question options (button values and labels/icons).
+	 *
+	 * Allows developers to modify or replace the available options
+	 * for inline questions such as yes/no or emoji sets.
+	 *
+	 * Each option key is submitted as the response value, and the label
+	 * may be plain text, emoji, or an icon string.
+	 *
+	 * Example usage:
+	 *
+	 * add_filter( 'ppls_inline_options', function( $options ) {
+	 *
+	 *     // Replace yes/no with text labels
+	 *     $options['yesno'] = [
+	 *         'yes' => 'Yes',
+	 *         'no'  => 'No',
+	 *     ];
+	 *
+	 *     // Customize emoji set
+	 *     $options['emoji'] = [
+	 *         'happy'   => '😄',
+	 *         'neutral' => '😐',
+	 *         'sad'     => '😢',
+	 *     ];
+	 *
+	 *     // Add a custom type (can be used via shortcode type="rating")
+	 *     $options['rating'] = [
+	 *         '1' => '⭐',
+	 *         '2' => '⭐⭐',
+	 *         '3' => '⭐⭐⭐',
+	 *         '4' => '⭐⭐⭐⭐',
+	 *         '5' => '⭐⭐⭐⭐⭐',
+	 *     ];
+	 *
+	 *     return $options;
+	 * });
+	 *
+	 * @since 1.2.0
+	 *
+	 * @param array $options {
+	 *     Array of option groups keyed by type.
+	 *
+	 *     @type array $yesno {
+	 *         Yes/No options.
+	 *
+	 *         @type string $yes Label or icon for "yes".
+	 *         @type string $no  Label or icon for "no".
+	 *     }
+	 *
+	 *     @type array $emoji {
+	 *         Emoji reaction options.
+	 *
+	 *         @type string $happy   Label or icon for "happy".
+	 *         @type string $neutral Label or icon for "neutral".
+	 *         @type string $sad     Label or icon for "sad".
+	 *     }
+	 * }
+	 *
+	 * @return array Modified options array.
+	 */
+	public static function render_question_shortcode( $atts ): string {
+
+		$atts = shortcode_atts(
+			[
+				'q'    => '',
+				'type' => 'yesno',
+				'id'   => '',
+			],
+			$atts,
+			'ppls_question'
+		);
+
+		$question = trim( (string) $atts['q'] );
+		if ( $question === '' ) {
+			return '';
+		}
+
+		$type = sanitize_key( $atts['type'] );
+
+		// --- Options (filterable) ---
+		$options = Inline_Utils::get_options();
+
+		// Validate type against options
+		if ( ! isset( $options[ $type ] ) ) {
+			$type = 'yesno';
+		}
+
+		$post_id = get_the_ID() ?: 0;
+
+		$qid = ! empty( $atts['id'] )
+			? sanitize_key( $atts['id'] )
+			: self::generate_qid( $question, $post_id );
+
+		// --- Security ---
+		$started_at = time() - 5;
+
+		$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] )
+			? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) )
+			: '';
+
+		$hash = hash_hmac(
+			'sha256',
+			$qid . '|' . $user_agent . '|' . gmdate( 'Y-m-d-H' ),
+			wp_salt()
+		);
+
+		// --- Options (filterable) ---
+		$options = Inline_Utils::get_options();
+
+		// Feedback (filterable)
+		$feedback = apply_filters(
+			'ppls_inline_feedback',
+			[
+				'icon' => '✓',
+				'text' => __( 'Thanks', 'plugiva-pulse' ),
+			]
+		);
+
+		$current = isset( $options[ $type ] ) ? $options[ $type ] : $options['yesno'];
+
+		ob_start();
+		?>
+
+		<div 
+			class="ppls-inline-question"
+			data-qid="<?php echo esc_attr( $qid ); ?>"
+			data-post="<?php echo esc_attr( $post_id ); ?>"
+			data-hash="<?php echo esc_attr( $hash ); ?>"
+			data-started="<?php echo esc_attr( $started_at ); ?>"
+			data-ajax="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
+			data-qtype="<?php echo esc_attr( $type ); ?>"
+		>
+
+			<?php wp_nonce_field( 'ppls_submit', 'ppls_nonce' ); ?>
+
+			<p class="ppls-q-text">
+				<?php echo esc_html( $question ); ?>
+			</p>
+
+			<div class="ppls-options">
+				<?php foreach ( $current as $value => $label ) : ?>
+					<button 
+						type="button" 
+						class="ppls-option-btn"
+						data-value="<?php echo esc_attr( $value ); ?>"
+					>
+						<span class="ppls-option-label">
+							<?php echo esc_html( Inline_Utils::get_label( $label ) ); ?>
+						</span>
+					</button>
+				<?php endforeach; ?>
+			</div>
+
+			<div class="ppls-feedback" hidden>
+				<span class="ppls-feedback-icon">
+					<?php echo esc_html( $feedback['icon'] ); ?>
+				</span>
+				<span class="ppls-feedback-text">
+					<?php echo esc_html( $feedback['text'] ); ?>
+				</span>
+			</div>
+
+		</div>
+
+		<?php
+		return (string) ob_get_clean();
+	}
+
 }
