@@ -63,7 +63,10 @@ final class Responses_Page {
 		// CSV export: raw output intended (non-HTML), values escaped via esc_csv().
 		
 		echo implode( ',', [
-			'Pulse Title',
+			'Type',
+			'Source',
+			'Post ID',
+			'Post URL',
 			'Pulse ID',
 			'Question',
 			'Answer',
@@ -74,13 +77,29 @@ final class Responses_Page {
 
 		foreach ( $rows as $row ) {
 
-			$title = $pulses[ $row['pulse_id'] ]['title'] ?? '(Deleted pulse)';
+			$post_id = isset( $row['post_id'] ) ? (int) $row['post_id'] : 0;
+			$post_url = $post_id > 0 ? esc_url( get_permalink( $post_id ) ) : '';
+
+			$is_inline = isset( $row['question_type'] ) && $row['question_type'] === 'inline';
+
+			if ( $is_inline ) {
+				$type = 'Inline';
+
+				$post_id = (int) ( $row['post_id'] ?? 0 );
+				$title   = $post_id > 0 ? get_the_title( $post_id ) : '(Unknown page)';
+			} else {
+				$type  = 'Pulse';
+				$title = $pulses[ $row['pulse_id'] ]['title'] ?? '(Deleted pulse)';
+			}
 
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			echo implode( ',', array_map(
 				[ __CLASS__, 'esc_csv' ],
 				[
+					$type,
 					$title,
+					$post_id,
+					$post_url,
 					$row['pulse_id'],
 					$row['question_label'],
 					$row['answer'],

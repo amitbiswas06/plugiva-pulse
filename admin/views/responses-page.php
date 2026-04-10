@@ -29,6 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	<?php endif; ?>
 	<form method="post" id="ppls-responses-form">
+		<input type="hidden" name="page" value="ppls-responses" />
 		<?php
 		wp_nonce_field( 'bulk-responses', 'ppls_nonce' );
 		$table->display();
