@@ -144,39 +144,44 @@ final class Submissions {
 
 	private static function validate_spam( array $payload ): void {
 
-		$meta     = $payload['meta'];
-		$identifier = ! empty( $payload['pulse_id'] )
-			? $payload['pulse_id']
-			: $payload['qid'];
+		$meta = $payload['meta'] ?? [];
 
-		// Honeypot.
+		$type = isset( $payload['type'] )
+			? sanitize_key( $payload['type'] )
+			: 'pulse';
+
+		// Unified identifier
+		$id = ! empty( $payload['pulse_id'] )
+			? sanitize_key( $payload['pulse_id'] )
+			: sanitize_key( $payload['qid'] ?? '' );
+
+		// --- Honeypot ---
 		if ( ! empty( $meta['ppls_hp'] ) ) {
 			wp_send_json_error( [ 'message' => 'Invalid submission.' ], 400 );
 		}
 
-		// Time-to-submit (min 3s).
+		// --- Time-to-submit (min 3s) ---
 		$started_at = isset( $meta['started_at'] ) ? absint( $meta['started_at'] ) : 0;
 		if ( $started_at > 0 && ( time() - $started_at ) < 3 ) {
 			wp_send_json_error( [ 'message' => 'Submission too fast.' ], 400 );
 		}
 
-		// Session hash.
-		// PATCH: sanitize user agent
-		$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] )
-			? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) )
-			: '';
-
-		$expected = hash_hmac(
-			'sha256',
-			$identifier . '|' . $user_agent . '|' . gmdate( 'Y-m-d-H' ),
-			wp_salt()
-		);
-
+		// --- Hash validation ---
 		$received_hash = isset( $meta['hash'] )
 			? sanitize_text_field( $meta['hash'] )
 			: '';
 
-		if ( empty( $received_hash ) || ! hash_equals( $expected, $received_hash ) ) {
+		if ( empty( $received_hash ) ) {
+			wp_send_json_error( [ 'message' => 'Invalid session.' ], 403 );
+		}
+
+		// Determine context
+		$context = ( $type === 'question' ) ? 'inline' : 'pulse';
+
+		// Get valid hashes from single source
+		$valid_hashes = Hash_Utils::get_request_hashes( $id, $context );
+
+		if ( ! in_array( $received_hash, $valid_hashes, true ) ) {
 			wp_send_json_error( [ 'message' => 'Invalid session.' ], 403 );
 		}
 	}

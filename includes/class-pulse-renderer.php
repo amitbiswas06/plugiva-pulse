@@ -52,16 +52,11 @@ final class Pulse_Renderer {
 				<?php
 				$started_at = time();
 				
-				// PATCH: sanitize user agent
-				$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] )
-					? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) )
-					: '';
-
-				$session_hash = hash_hmac(
-					'sha256',
-					$pulse['id'] . '|' . $user_agent . '|' . gmdate( 'Y-m-d-H' ),
-					wp_salt()
-				);
+				// Unified session hash generation for both pulse and inline contexts.
+				// Generate session hash to prevent duplicates and ensure valid context.
+				// @since 1.2.0
+				$hashes = Hash_Utils::get_request_hashes( $pulse['id'], 'pulse' );
+				$session_hash = $hashes[0];
 				?>
 
 				<input type="hidden" name="meta[started_at]" value="<?php echo esc_attr( $started_at ); ?>">
@@ -309,15 +304,9 @@ final class Pulse_Renderer {
 		// --- Security ---
 		$started_at = time() - 5;
 
-		$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] )
-			? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) )
-			: '';
-
-		$hash = hash_hmac(
-			'sha256',
-			$qid . '|' . $user_agent . '|' . gmdate( 'Y-m-d-H' ),
-			wp_salt()
-		);
+		// Generate session hash to prevent duplicates and ensure valid context.
+		$hashes = Hash_Utils::get_request_hashes( $qid, 'inline' );
+		$hash   = $hashes[0]; // current bucket only
 
 		// Feedback (filterable)
 		$feedback = wp_parse_args(

@@ -100,3 +100,24 @@
 	font-size: 12px;
 	color: #666;
 }
+
+/* Inline question */
+.ppls-option-btn.is-selected {
+	background: #2271b1;
+	color: #fff;
+}
+
+.ppls-inline-question.is-loading {
+	opacity: 0.7;
+}
+
+.ppls-feedback {
+	opacity: 0;
+	transform: translateY(5px);
+	transition: all 0.2s ease;
+}
+
+.ppls-feedback.is-visible {
+	opacity: 1;
+	transform: translateY(0);
+}
