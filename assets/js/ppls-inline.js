@@ -78,22 +78,24 @@
 			credentials: 'same-origin',
 			body: data
 		})
-		.then(() => {
+		.then(res => res.json())
+		.then(res => {
 
-			// --- Persist state ---
+			if (!res.success) {
+				throw new Error(res.data?.message || 'Request failed');
+			}
+
+			// --- SUCCESS ---
 			const key = 'ppls_' + qid + '_' + hash;
 			localStorage.setItem(key, '1');
 
-			// --- UI ---
 			wrapper.classList.remove('is-loading');
 			wrapper.classList.add('ppls-done');
 
 			const options = wrapper.querySelector('.ppls-options');
 			const feedback = wrapper.querySelector('.ppls-feedback');
 
-			if (options) {
-				options.style.display = 'none';
-			}
+			if (options) options.style.display = 'none';
 
 			if (feedback) {
 				feedback.hidden = false;
@@ -101,17 +103,22 @@
 			}
 
 		})
-		.catch(() => {
+		.catch((err) => {
 
 			wrapper.classList.remove('is-loading', 'is-submitting');
+
 			buttons.forEach(b => b.disabled = false);
 
 			const feedback = wrapper.querySelector('.ppls-feedback');
+
 			if (feedback) {
 				feedback.hidden = false;
-				feedback.textContent = '⚠ Try again';
+				feedback.classList.add('is-visible');
+				feedback.textContent = '⚠ Session expired. Please refresh.';
 			}
+
 		});
+
 	});
 
 })();
