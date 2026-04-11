@@ -31,7 +31,7 @@ final class Assets {
 			'ppls-inline',
 			PPLS_URL . 'assets/js/ppls-inline.js',
 			[],
-			microtime(), //PPLS_VERSION,
+			PPLS_VERSION,
 			true
 		);
 

@@ -43,6 +43,21 @@ class Hash_Utils {
 
         // Different windows per type (VERY IMPORTANT)
         if ( $type === 'inline' ) {
+            /**
+             * Filter the hash window duration for inline questions.
+             *
+             * Controls how long a session hash remains valid before regenerating.
+             *
+             * @param int $window Duration in seconds. Default is HOUR_IN_SECONDS.
+             *
+             * @return int Modified duration in seconds.
+             *
+             * @example
+             * // Change hash refresh to every 10 minutes
+             * add_filter( 'ppls_inline_hash_window', function( $window ) {
+             *     return 600;
+             * });
+             */
             $window = apply_filters( 'ppls_inline_hash_window', HOUR_IN_SECONDS );
         } else {
             $window = apply_filters( 'ppls_pulse_hash_window', HOUR_IN_SECONDS );

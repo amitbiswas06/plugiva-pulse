@@ -53,6 +53,12 @@ class Inline_Utils {
 			}
 
 			foreach ( $items as $key => $value ) {
+
+				// Prevent undefined index warning
+				if ( ! isset( $sanitized[ $type ] ) ) {
+					$sanitized[ $type ] = [];
+				}
+
 				$sanitized[ $type ][ sanitize_key( $key ) ] = $value;
 			}
 		}

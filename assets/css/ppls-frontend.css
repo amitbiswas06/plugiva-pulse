@@ -102,9 +102,23 @@
 }
 
 /* Inline question */
+.ppls-option-btn {
+	transition: transform 0.08s ease;
+}
+
+.ppls-option-btn:hover {
+	transform: scale(1.05);
+}
+
+.ppls-option-btn:active {
+	transform: scale(0.94);
+}
+
 .ppls-option-btn.is-selected {
 	background: #2271b1;
 	color: #fff;
+	transform: scale(1.08);
+	transition: all 0.15s ease;
 }
 
 .ppls-inline-question.is-loading {
@@ -113,11 +127,23 @@
 
 .ppls-feedback {
 	opacity: 0;
-	transform: translateY(5px);
+	transform: translateY(6px);
 	transition: all 0.2s ease;
 }
 
 .ppls-feedback.is-visible {
 	opacity: 1;
 	transform: translateY(0);
+}
+
+.ppls-inline-question {
+	transition: opacity 0.3s ease;
+}
+
+.ppls-inline-question.is-fading {
+	opacity: 0;
+}
+
+.ppls-inline-question[data-answered="1"] {
+	display: none !important;
 }

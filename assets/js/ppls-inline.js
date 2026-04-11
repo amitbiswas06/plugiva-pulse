@@ -16,7 +16,7 @@
 			const key = 'ppls_' + qid + '_' + hash;
 
 			if (localStorage.getItem(key)) {
-				wrapper.style.display = 'none';
+				wrapper.setAttribute('data-answered', '1');
 			}
 		});
 	});
