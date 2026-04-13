@@ -35,6 +35,15 @@ final class Menu {
 
 		add_submenu_page(
 			'ppls-pulses',
+			esc_html__( 'Inline Feedback', 'plugiva-pulse' ),
+			esc_html__( 'Inline', 'plugiva-pulse' ),
+			'manage_options',
+			'ppls-inline',
+			[ Inline_Page::class, 'render' ]
+		);
+
+		add_submenu_page(
+			'ppls-pulses',
 			esc_html__( 'Responses', 'plugiva-pulse' ),
 			esc_html__( 'Responses', 'plugiva-pulse' ),
 			'manage_options',

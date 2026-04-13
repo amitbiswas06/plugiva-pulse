@@ -314,13 +314,13 @@ final class Pulse_Renderer {
 			apply_filters(
 				'ppls_inline_feedback',
 				[
-					'icon' => '✓',
-					'text' => __( 'Thanks for your feedback!', 'plugiva-pulse' ),
+					'icon' => esc_html__( '&#10003;', 'plugiva-pulse' ),
+					'text' => esc_html__( 'Thanks for your feedback!', 'plugiva-pulse' ),
 				]
 			),
 			[
-				'icon' => '✓',
-				'text' => __( 'Thanks for your feedback!', 'plugiva-pulse' ),
+				'icon' => esc_html__( '&#10003;', 'plugiva-pulse' ),
+				'text' => esc_html__( 'Thanks for your feedback!', 'plugiva-pulse' ),
 			]
 		);
 

@@ -31,13 +31,13 @@ class Inline_Utils {
 			'ppls_inline_options',
 			[
 				'yesno' => [
-					'yes' => '👍',
-					'no'  => '👎',
+					'yes' => esc_html__( '&#128077;', 'plugiva-pulse' ),
+					'no'  => esc_html__( '&#128078;', 'plugiva-pulse' ),
 				],
 				'emoji' => [
-					'happy'   => '😊',
-					'neutral' => '😐',
-					'sad'     => '😞',
+					'happy'   => esc_html__( '&#128513;', 'plugiva-pulse' ),
+					'neutral' => esc_html__( '&#128528;', 'plugiva-pulse' ),
+					'sad'     => esc_html__( '&#128577;', 'plugiva-pulse' ),
 				],
 			]
 		);
@@ -70,8 +70,8 @@ class Inline_Utils {
 	 * Normalize option label.
 	 *
 	 * Supports:
-	 * - 'yes' => '👍'
-	 * - 'yes' => [ 'label' => '👍' ]
+	 * - 'yes' => '&#128077;'
+	 * - 'yes' => [ 'label' => '&#128077;' ]
 	 *
 	 * @since 1.2.0
 	 *

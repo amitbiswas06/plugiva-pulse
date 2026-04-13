@@ -384,16 +384,17 @@ final class Submissions {
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$table} 
 				WHERE pulse_id = %s 
-				AND session_hash = %s 
-				AND post_id = %d",
+				AND session_hash = %s",
 				$qid,
-				$hash,
-				$post_id
+				$hash
 			)
 		);
 
-		if ( $exists ) {
-			return; // silently ignore
+		if ( $exists > 0 ) {
+			wp_send_json_error(
+				[ 'message' => 'Already submitted.' ],
+				409
+			);
 		}
 
 		$wpdb->insert(

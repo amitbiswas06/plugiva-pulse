@@ -34,6 +34,7 @@ final class Plugin {
 			require_once PPLS_PATH . 'admin/class-pulses-page.php';
 			require_once PPLS_PATH . 'admin/class-responses-page.php';
 			require_once PPLS_PATH . 'admin/class-responses-table.php';
+			require_once PPLS_PATH . 'admin/class-inline-page.php';
 
 			Admin::init();
 		}
