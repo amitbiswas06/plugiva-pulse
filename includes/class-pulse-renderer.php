@@ -272,9 +272,10 @@ final class Pulse_Renderer {
 
 		$atts = shortcode_atts(
 			[
-				'q'    => '',
-				'type' => 'yesno',
-				'id'   => '',
+				'q'    	=> '',
+				'type' 	=> 'yesno',
+				'id'   	=> '',
+				'class' => '',
 			],
 			$atts,
 			'ppls_question'
@@ -325,11 +326,16 @@ final class Pulse_Renderer {
 
 		$current = $options[ $type ];
 
+		// attribute class for custom styling
+		$class 		= sanitize_html_class( $atts['class'] );
+		$class_attr = "ppls-inline-question";
+		$class_attr = $class ? $class_attr . ' ' . $class : $class_attr;
+
 		ob_start();
 		?>
 
 		<div 
-			class="ppls-inline-question"
+			class="<?php echo esc_attr( $class_attr ); ?>"
 			data-qid="<?php echo esc_attr( $qid ); ?>"
 			data-post="<?php echo esc_attr( $post_id ); ?>"
 			data-hash="<?php echo esc_attr( $hash ); ?>"
