@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Plugiva Pulse
  * Description: Create lightweight feedback forms and quick polls with yes/no, emoji, and text responses inside WordPress.
- * Version:     1.2.0
+ * Version:     1.2.1
  * Author:      Plugiva
  * Author URI:  https://plugiva.com
  * License:     GPL v2 or later
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'PPLS_VERSION', '1.2.0' );
+define( 'PPLS_VERSION', '1.2.1' );
 define( 'PPLS_DB_VERSION', '1.2.0' );
 define( 'PPLS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PPLS_URL', plugin_dir_url( __FILE__ ) );

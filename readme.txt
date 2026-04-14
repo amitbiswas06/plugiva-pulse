@@ -1,14 +1,14 @@
-=== Plugiva Pulse ===
+=== Plugiva Pulse - Inline Feedback Plugin for WordPress ===
 Contributors: amitbiswas06
 Tags: feedback, poll, survey, questionnaire, engagement
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Create lightweight feedback forms and quick polls with yes/no, emoji, and text responses inside WordPress.
+A lightweight inline feedback plugin that blends into your content and captures real user sentiment without disruption.
 
 == Description ==
 
@@ -175,6 +175,10 @@ Yes. The plugin includes a clean uninstall routine to remove stored data.
 7. CSV export
 
 == Changelog ==
+
+= 1.2.1 =
+* Improved plugin title and readme for better clarity and discovery
+* Minor optimizations
 
 = 1.2.0 =
 * New: Inline feedback questions via shortcode (yes/no, emoji, custom types)
